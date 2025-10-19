@@ -59,8 +59,9 @@ const Header = ({ activeHeading }) => {
           <div>
             <Link to="/">
               <img
-                src="https://postimg.cc/CdtqGYd5"
-                alt=""
+                src="https://tse2.mm.bing.net/th/id/OIP.WgoDlSN5TL-p_u5OEYhPVQHaDO?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3"
+                alt="Logo"
+                className="cursor-pointer h-[80px] object-contain"
               />
             </Link>
           </div>
@@ -101,7 +102,7 @@ const Header = ({ activeHeading }) => {
           <div className={`${styles.button}`}>
             <Link to={`${isSeller ? "/dashboard" : "/shop-create"}`}>
               <h1 className="text-[#fff] flex items-center">
-                {isSeller ? "Go Dashboard" : "Become Seller"}{" "}
+                {isSeller ? "Back Seller" : "Thêm SELLER"}{" "}
                 <IoIosArrowForward className="ml-1" />
               </h1>
             </Link>
@@ -123,7 +124,7 @@ const Header = ({ activeHeading }) => {
               <button
                 className={`h-[100%] w-full flex justify-between items-center pl-10 bg-white font-sans text-lg font-[500] select-none rounded-t-md`}
               >
-                All Categories
+                Menu
               </button>
               <IoIosArrowDown
                 size={20}
@@ -218,9 +219,9 @@ const Header = ({ activeHeading }) => {
           <div>
             <Link to="/">
               <img
-                src="https://i.postimg.cc/t4w3PdVk/Long-Nam-6.png"
+                src="https://tse2.mm.bing.net/th/id/OIP.WgoDlSN5TL-p_u5OEYhPVQHaDO?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3"
                 alt=""
-                className="mt-3 cursor-pointer"
+                className="cursor-pointer h-[50px] object-contain"
               />
             </Link>
           </div>

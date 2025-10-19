@@ -1,25 +1,25 @@
 // navigation Data
 export const navItems = [
     {
-      title: "Home",
+      title: "Trang Chủ",
       url: "/",
     },
     {
-      title: "Best Selling",
+      title: "Bán Chạy",
       url: "/best-selling",
     },
     {
-      title: "Products",
+      title: "Sản Phẩm",
       url: "/products",
     },
     {
-      title: "Events",
+      title: "Sự Kiện",
       url: "/events",
     },
-    {
-      title: "FAQ",
-      url: "/faq",
-    },
+    // {
+    //   title: "FAQ",
+    //   url: "/faq",
+    // },
   ];
   
   // branding data

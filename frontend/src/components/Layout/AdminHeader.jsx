@@ -15,8 +15,9 @@ const AdminHeader = () => {
     <div>
       <Link to="/">
         <img
-          src="https://i.postimg.cc/t4w3PdVk/Long-Nam-6.png"
+          src="https://tse2.mm.bing.net/th/id/OIP.WgoDlSN5TL-p_u5OEYhPVQHaDO?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3"
           alt=""
+          className="cursor-pointer h-[50px] object-contain"
         />
       </Link>
     </div>

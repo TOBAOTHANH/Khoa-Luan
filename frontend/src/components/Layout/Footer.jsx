@@ -37,12 +37,12 @@ const Footer = () => {
       <div className="grid grid-cols-1 sm:gird-cols-3 lg:grid-cols-4 gap-6 sm:px-8 px-5 py-16 sm:text-center">
         <ul className="px-5 text-center sm:text-start flex sm:block flex-col items-center">
           <img
-            src="https://postimg.cc/CdtqGYd5"
+            src="https://free-images.com/md/5be5/logo_iuh_png.jpg"
             alt=""
-            style={{ filter: "brightness(0) invert(1)" }}
+            className="cursor-pointer h-[100px] object-contain"
           />
           <br />
-          <p>The home and elements needeed to create beatiful products.</p>
+          <p>Những Sản Phẩm Tuyệt Vời Cho Cuộc Sống Của Bạn</p>
           <div className="flex items-center mt-[15px]">
             <AiFillFacebook size={25} className="cursor-pointer" />
             <AiOutlineTwitter
@@ -116,6 +116,7 @@ const Footer = () => {
           <img
             src="https://hamart-shop.vercel.app/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffooter-payment.a37c49ac.png&w=640&q=75"
             alt=""
+
           />
         </div>
       </div>

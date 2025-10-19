@@ -27,6 +27,10 @@ const ProductCard = ({ data,isEvent }) => {
   const [click, setClick] = useState(false);
   const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
+  const { user, isAuthenticated } = useSelector((state) => state.user);
+
+
+
 
   useEffect(() => {
     if (wishlist && wishlist.find((i) => i._id === data._id)) {
@@ -48,19 +52,30 @@ const ProductCard = ({ data,isEvent }) => {
   };
 
   const addToCartHandler = (id) => {
-    const isItemExists = cart && cart.find((i) => i._id === id);
-    if (isItemExists) {
-      toast.error("Item already in cart!");
+  // 🔒 Kiểm tra đăng nhập trước
+  if (!isAuthenticated || !user) {
+    toast.error("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!");
+    // 👉 Điều hướng đến trang đăng nhập
+    window.location.href = "/login"; 
+    // setShowLoginModal(true);
+    return;
+  }
+
+  // ✅ Nếu đã đăng nhập thì tiếp tục
+  const isItemExists = cart && cart.find((i) => i._id === id);
+  if (isItemExists) {
+    toast.error("Sản phẩm đã có trong giỏ hàng!");
+  } else {
+    if (data.stock < 1) {
+      toast.error("Sản phẩm đã hết hàng!");
     } else {
-      if (data.stock < 1) {
-        toast.error("Product stock limited!");
-      } else {
-        const cartData = { ...data, qty: 1 };
-        dispatch(addTocart(cartData));
-        toast.success("Item added to cart successfully!");
-      }
+      const cartData = { ...data, qty: 1 };
+      dispatch(addTocart(cartData));
+      toast.success("Đã thêm vào giỏ hàng!");
     }
-  };
+  }
+};
+
 
    // Kiểm tra dữ liệu hình ảnh
 
