@@ -17,25 +17,25 @@ const AdPopup = () => {
       img: "https://png.pngtree.com/template/20220330/ourlarge/pngtree-e-commerce-red-skin-care-products-moisturizing-set-beauty-banner-image_909477.jpg",
       title: "Siêu Sale Mỹ Phẩm 💄",
       desc: "Mua 1 tặng 1 cho tất cả sản phẩm dưỡng da!",
-      link: "/category/beauty",
+      link: "/products",
     },
     {
       img: "https://img.pikbest.com/background/20220119/red-e-commerce-product-promotion-background-picture_6224800.jpg!sw800",
       title: "Flash Sale Cuối Tuần ⚡",
       desc: "Giảm giá sốc chỉ hôm nay – Đừng bỏ lỡ!",
-      link: "/flash-sale",
+      link: "/products",
     },
     {
       img: "https://png.pngtree.com/png-vector/20230722/ourmid/pngtree-new-arrival-sale-banner-design-vector-png-image_8362190.png",
       title: "Hàng Mới Ra Mắt 🚀",
       desc: "Cập nhật xu hướng mới nhất – giá cực hời!",
-      link: "/new-arrivals",
+      link: "/products",
     },
     {
       img: "https://graphicsfamily.com/wp-content/uploads/edd/2022/12/E-commerce-Product-Banner-Design-scaled.jpg",
       title: "Ưu Đãi Đặc Biệt 🎁",
       desc: "Giảm thêm 20% khi thanh toán qua ShopeePay!",
-      link: "/promotion",
+      link: "/products",
     },
   ];
 

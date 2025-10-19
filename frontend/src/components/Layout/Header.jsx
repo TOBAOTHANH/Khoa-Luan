@@ -59,7 +59,7 @@ const Header = ({ activeHeading }) => {
           <div>
             <Link to="/">
               <img
-                src="https://i.postimg.cc/t4w3PdVk/Long-Nam-6.png"
+                src="https://postimg.cc/CdtqGYd5"
                 alt=""
               />
             </Link>
