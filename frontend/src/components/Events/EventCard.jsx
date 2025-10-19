@@ -71,7 +71,7 @@ const EventCard = ({ active, data }) => {
             </h5>
           </div>
           <span className="pr-3 font-[400] text-[17px] text-[#44a55e]">
-            {data?.sold_out ? `${data.sold_out} sold` : "No Sales Data"}
+            {data?.sold_out ? `${data.sold_out} sold` : "Đang Cập Nhật ..."}
           </span>
         </div>
 
