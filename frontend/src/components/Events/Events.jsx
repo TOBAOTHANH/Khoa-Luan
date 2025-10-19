@@ -12,7 +12,7 @@ const Events = () => {
         !isLoading && (
           <div className={`${styles.section}`}>
             <div className={`${styles.heading}`}>
-              <h1>Popular Events</h1>
+              <h1>Sự Kiện Đang Được Diễn Ra</h1>
             </div>
 
             <div className="w-full grid">
@@ -23,7 +23,7 @@ const Events = () => {
               }
               <h4>{
                 allEvents?.length === 0 && (
-                  'No Events have!'
+                  'Đang Câp Nhật Sự Kiện...'
                 )
               }
 

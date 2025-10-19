@@ -7,7 +7,7 @@ const Categories = () => {
   const navigate = useNavigate();
   return (
     <>
-      <div className={`${styles.section} hidden sm:block`}>
+      {/* <div className={`${styles.section} hidden sm:block`}>
         <div
           className={`branding my-12 flex justify-between w-full shadow-sm bg-white p-5 rounded-md`}
         >
@@ -22,7 +22,7 @@ const Categories = () => {
               </div>
             ))}
         </div>
-      </div>
+      </div> */}
 
       <div
         className={`${styles.section} bg-white p-6 rounded-lg mb-12`}
