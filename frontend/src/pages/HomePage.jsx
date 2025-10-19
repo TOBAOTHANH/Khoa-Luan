@@ -7,9 +7,12 @@ import FeaturedProduct from '../components/Route/FeaturedProduct/FeaturedProduct
 import Events from "../components/Events/Events";
 import Sponsored from '../components/Route/Sponsored'
 import Footer from '../components/Layout/Footer'
+import AdPopup from '../components/Layout/AdPopup'
+
 const HomePage = () => {
   return (
     <div>
+      <AdPopup/>
       <Header activeHeading = {1} />
       <Hero/>
       <Categories/>

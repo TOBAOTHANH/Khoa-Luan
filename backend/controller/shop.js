@@ -55,11 +55,11 @@ router.post('/create-shop', upload.single('file'), async (req, res, next) => {
     };
 
     const activationToken = createActivationToken(seller);
-    // const activationUrl = `http://localhost:3001/seller/activation/${activationToken}`;
-    const isProduction = process.env.NODE_ENV === 'production';
-    const activationUrl = isProduction
-      ? `https://frontend-one-kappa-74.vercel.app/seller/activation/${activationToken}`
-      : `http://localhost:3000/seller/activation/${activationToken}`;
+    const activationUrl = `http://localhost:3001/seller/activation/${activationToken}`;
+    // const isProduction = process.env.NODE_ENV === 'production';
+    // const activationUrl = isProduction
+    //   ? `https://frontend-one-kappa-74.vercel.app/seller/activation/${activationToken}`
+    //   : `http://localhost:3000/seller/activation/${activationToken}`;
 
     // Gửi email kích hoạt
     await sendMail({

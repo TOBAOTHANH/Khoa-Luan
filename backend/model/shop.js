@@ -7,11 +7,21 @@ const shopSchema = new mongoose.Schema({
     type: String,
     required: [true, "Please enter your shop name!"],
   },
-  email: {
+  // email: {
+  //   type: String,
+  //   required: [true, "Please enter your shop email address"],
+  // },
+   email: {
     type: String,
     required: [true, "Please enter your shop email address"],
   },
-  password: {
+  // password: {
+  //   type: String,
+  //   required: [true, "Please enter your password"],
+  //   minLength: [6, "Password should be greater than 6 characters"],
+  //   select: false,
+  // },
+    password: {
     type: String,
     required: [true, "Please enter your password"],
     minLength: [6, "Password should be greater than 6 characters"],
@@ -80,6 +90,14 @@ const shopSchema = new mongoose.Schema({
   resetPasswordTime: Date,
 });
 
+// // Hash password
+// shopSchema.pre("save", async function (next) {
+//   if (!this.isModified("password")) {
+//     next();
+//   }
+//   this.password = await bcrypt.hash(this.password, 10);
+// });
+
 // Hash password
 shopSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
@@ -87,6 +105,13 @@ shopSchema.pre("save", async function (next) {
   }
   this.password = await bcrypt.hash(this.password, 10);
 });
+
+// // jwt token
+// shopSchema.methods.getJwtToken = function () {
+//   return jwt.sign({ id: this._id }, process.env.JWT_SECRET_KEY, {
+//     expiresIn: process.env.JWT_EXPIRES,
+//   });
+// };
 
 // jwt token
 shopSchema.methods.getJwtToken = function () {

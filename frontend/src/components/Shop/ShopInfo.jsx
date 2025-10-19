@@ -9,10 +9,6 @@ import { getAllProductsShop } from "../../redux/actions/product";
 
 const ShopInfo = ({ isOwner }) => {
 
-
-
-
-
   const [data, setData] = useState({});
   const { id } = useParams();
   const [isLoading, setIsLoading] = useState(true);
