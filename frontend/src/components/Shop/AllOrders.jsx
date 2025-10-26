@@ -18,11 +18,11 @@ const AllOrders = () => {
   }, [dispatch]);
 
   const columns = [
-    { field: "id", headerName: "Order ID", minWidth: 150, flex: 0.7 },
+    { field: "id", headerName: "Mã Đơn Hàng", minWidth: 150, flex: 0.7 },
 
     {
       field: "status",
-      headerName: "Status",
+      headerName: "Trạng Thái",
       minWidth: 130,
       flex: 0.7,
       cellClassName: (params) => {
@@ -31,14 +31,14 @@ const AllOrders = () => {
     },
     {
       field: "itemsQty",
-      headerName: "Items Qty",
+      headerName: "Số Lượng Sản Phẩm",
       type: "number",
       minWidth: 130,
       flex: 0.7,
     },
     {
       field: "total",
-      headerName: "Total",
+      headerName: "Tổng Giá",
       type: "number",
       minWidth: 130,
       flex: 0.8,

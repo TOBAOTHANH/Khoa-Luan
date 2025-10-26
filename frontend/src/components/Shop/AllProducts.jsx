@@ -10,8 +10,8 @@ import Loader from "../Layout/Loader";
 
 const AllProducts = () => {
   const { products, isLoading } = useSelector((state) => state.products);
- 
-  
+
+
   const { seller } = useSelector((state) => state.seller);
 
   const dispatch = useDispatch();
@@ -26,22 +26,22 @@ const AllProducts = () => {
   };
 
   const columns = [
-    { field: "id", headerName: "Product Id", minWidth: 150, flex: 0.7 },
+    { field: "id", headerName: "Id Sản Phẩm", minWidth: 150, flex: 0.7 },
     {
       field: "name",
-      headerName: "Name",
+      headerName: "Tên Sản Phẩm",
       minWidth: 180,
       flex: 1.4,
     },
     {
       field: "price",
-      headerName: "Price",
+      headerName: "Giá Sản Phẩm",
       minWidth: 100,
       flex: 0.6,
     },
     {
       field: "Stock",
-      headerName: "Stock",
+      headerName: "Tồn Kho",
       type: "number",
       minWidth: 80,
       flex: 0.5,
@@ -49,7 +49,7 @@ const AllProducts = () => {
 
     {
       field: "sold",
-      headerName: "Sold out",
+      headerName: "Đã Bán",
       type: "number",
       minWidth: 130,
       flex: 0.6,
@@ -58,7 +58,7 @@ const AllProducts = () => {
       field: "Preview",
       flex: 0.8,
       minWidth: 100,
-      headerName: "",
+      headerName: "Xem Thông Tin Sản Phẩm",
       type: "number",
       sortable: false,
       renderCell: (params) => {
@@ -77,7 +77,7 @@ const AllProducts = () => {
       field: "Delete",
       flex: 0.8,
       minWidth: 120,
-      headerName: "",
+      headerName: " Xóa Sản Phẩm",
       type: "number",
       sortable: false,
       renderCell: (params) => {
@@ -99,7 +99,7 @@ const AllProducts = () => {
       row.push({
         id: item._id,
         name: item.name,
-        price: "US$ " + item.discountPrice,
+        price: item.discountPrice + " " + "US$ ",
         Stock: item.stock,
         sold: item?.sold_out,
       });

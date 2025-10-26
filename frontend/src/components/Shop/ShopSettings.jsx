@@ -8,7 +8,7 @@ import { loadSeller } from "../../redux/actions/user";
 import { toast } from "react-toastify";
 
 const ShopSettings = () => {
-    const { user, error, successMessage } = useSelector((state) => state.user);
+  const { user, error, successMessage } = useSelector((state) => state.user);
   const { seller } = useSelector((state) => state.seller);
   const [avatar, setAvatar] = useState();
   const [name, setName] = useState(seller && seller.name);
@@ -24,11 +24,11 @@ const ShopSettings = () => {
   const handleImage = async (e) => {
     const file = e.target.files[0];
     setAvatar(file);
-  
+
     const formData = new FormData();
     formData.append("image", file);
     formData.append("public_id", file.name); // Lưu tên đầy đủ của hình ảnh
-  
+
     await axios
       .put(`${server}/shop/update-avatar`, formData, {
         headers: {
@@ -44,7 +44,7 @@ const ShopSettings = () => {
         toast.error(error.response?.data?.message || "Failed to update avatar.");
       });
   };
-  
+
 
   const updateHandler = async (e) => {
     e.preventDefault();
@@ -76,7 +76,7 @@ const ShopSettings = () => {
         <div className="w-full flex items-center justify-center">
           <div className="relative">
             <img
-               src={`${backend_url}${seller?.avatar?.public_id}`} 
+              src={`${backend_url}${seller?.avatar?.public_id}`}
               alt=""
               className="w-[200px] h-[200px] rounded-full cursor-pointer"
             />
@@ -102,7 +102,7 @@ const ShopSettings = () => {
         >
           <div className="w-[100%] flex items-center flex-col 800px:w-[50%] mt-5">
             <div className="w-full pl-[3%]">
-              <label className="block pb-2">Shop Name</label>
+              <label className="block pb-2">Tên Cửa Hàng</label>
             </div>
             <input
               type="name"
@@ -115,15 +115,14 @@ const ShopSettings = () => {
           </div>
           <div className="w-[100%] flex items-center flex-col 800px:w-[50%] mt-5">
             <div className="w-full pl-[3%]">
-              <label className="block pb-2">Shop description</label>
+              <label className="block pb-2">Mô Tả Cửa Hàng</label>
             </div>
             <input
               type="name"
-              placeholder={`${
-                seller?.description
-                  ? seller.description
-                  : "Enter your shop description"
-              }`}
+              placeholder={`${seller?.description
+                ? seller.description
+                : "Enter your shop description"
+                }`}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className={`${styles.input} !w-[95%] mb-4 800px:mb-0`}
@@ -131,7 +130,7 @@ const ShopSettings = () => {
           </div>
           <div className="w-[100%] flex items-center flex-col 800px:w-[50%] mt-5">
             <div className="w-full pl-[3%]">
-              <label className="block pb-2">Shop Address</label>
+              <label className="block pb-2">Địa Chỉ Cửa Hàng</label>
             </div>
             <input
               type="name"
@@ -145,7 +144,7 @@ const ShopSettings = () => {
 
           <div className="w-[100%] flex items-center flex-col 800px:w-[50%] mt-5">
             <div className="w-full pl-[3%]">
-              <label className="block pb-2">Shop Phone Number</label>
+              <label className="block pb-2">Số Điện Thoại Cửa Hàng</label>
             </div>
             <input
               type="number"
@@ -159,7 +158,7 @@ const ShopSettings = () => {
 
           <div className="w-[100%] flex items-center flex-col 800px:w-[50%] mt-5">
             <div className="w-full pl-[3%]">
-              <label className="block pb-2">Shop Zip Code</label>
+              <label className="block pb-2">Mã Bưu Điện Cửa Hàng</label>
             </div>
             <input
               type="number"
@@ -171,10 +170,11 @@ const ShopSettings = () => {
             />
           </div>
 
-          <div className="w-[100%] flex items-center flex-col 800px:w-[50%] mt-5">
+          <div className="w-full md:w-1/2 flex flex-col items-center justify-center mt-5 p-4 bg-white rounded-2xl shadow-md">
+
             <input
               type="submit"
-              value="Update Shop"
+              value="Cập Nhật Thông Tin Cửa Hàng"
               className={`${styles.input} !w-[95%] mb-4 800px:mb-0`}
               required
               readOnly

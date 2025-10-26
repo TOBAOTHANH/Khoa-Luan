@@ -21,7 +21,7 @@ const ShopLogin = () => {
       )
       .then((res) => {
         toast.success("Login successfully");
-         navigate("/dashboard");
+        navigate("/dashboard");
         window.location.reload(true);
       })
       .catch((err) => {
@@ -33,7 +33,7 @@ const ShopLogin = () => {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Login to your Shop
+          Đăng Nhập Tài Khoản Bán Hàng
         </h2>
       </div>
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -44,13 +44,13 @@ const ShopLogin = () => {
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700"
               >
-                Email address
+                Nhập Email
               </label>
               <div className="mt-1">
                 <input
                   type="email"
                   name="email"
-                  placeholder="Please email"
+                  placeholder="Vui lòng nhập email"
                   autoComplete="email"
                   required
                   value={email}
@@ -64,13 +64,13 @@ const ShopLogin = () => {
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700"
               >
-                Password
+                Mật Khẩu
               </label>
               <div className="mt-1 relative">
                 <input
                   type={visible ? "text" : "password"}
                   name="password"
-                  placeholder="Please Password"
+                  placeholder="Vui lòng nhập mật khẩu"
                   autoComplete="current-password"
                   required
                   value={password}
@@ -104,7 +104,7 @@ const ShopLogin = () => {
                   htmlFor="remember-me"
                   className="ml-2 block text-sm text-gray-900"
                 >
-                  Remember me
+                  Ghi nhớ
                 </label>
               </div>
               <div className="text-sm">
@@ -112,7 +112,7 @@ const ShopLogin = () => {
                   href=".forgot-password"
                   className="font-medium text-blue-600 hover:text-blue-500"
                 >
-                  Forgot your password?
+                  Quên mật khẩu?
                 </a>
               </div>
             </div>
@@ -121,13 +121,13 @@ const ShopLogin = () => {
                 type="submit"
                 className="group relative w-full h-[40px] flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
               >
-                Submit
+                Đăng Nhập
               </button>
             </div>
             <div className={`${styles.noramlFlex} w-full`}>
-              <h4>Not have any account?</h4>
-              <Link to="/shop-create" className="text-blue-600 pl-2">
-                Sign Up
+              <h4>Bạn chưa có tài khoản?</h4>
+              <Link to="" className="text-blue-600 pl-2">
+                Đăng Ký
               </Link>
             </div>
           </form>

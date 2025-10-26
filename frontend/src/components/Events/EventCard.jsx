@@ -37,9 +37,8 @@ const EventCard = ({ active, data }) => {
 
   return (
     <div
-      className={`w-full block bg-white rounded-lg ${
-        active ? "unset" : "mb-12"
-      } lg:flex p-2`}
+      className={`w-full block bg-white rounded-lg ${active ? "unset" : "mb-12"
+        } lg:flex p-2`}
     >
       <div className="w-full lg:w-[30%] m-auto">
         {data?.images?.[0] ? (
@@ -56,7 +55,7 @@ const EventCard = ({ active, data }) => {
       </div>
 
       <div className="w-full lg:w-[50%] flex flex-col justify-center">
-        <h2 className={`${styles.productTitle}`}>{data?.name || "No Name"}</h2>
+        <h2 className={`${styles.productTitle}`}>{data?.name || "không có sản phẩm"}</h2>
         <p>{data?.description || "No Description"}</p>
 
         <div className="flex py-2 justify-between">

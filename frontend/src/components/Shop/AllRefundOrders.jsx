@@ -20,11 +20,11 @@ const AllRefundOrders = () => {
   const refundOrders = orders && orders.filter((item) => item.status === "Processing refund"  || item.status === "Refund Success");
 
   const columns = [
-    { field: "id", headerName: "Order ID", minWidth: 150, flex: 0.7 },
+    { field: "id", headerName: "Mã Đơn Hàng", minWidth: 150, flex: 0.7 },
 
     {
       field: "status",
-      headerName: "Status",
+      headerName: "Trạng Thái",
       minWidth: 130,
       flex: 0.7,
       cellClassName: (params) => {
@@ -35,7 +35,7 @@ const AllRefundOrders = () => {
     },
     {
       field: "itemsQty",
-      headerName: "Items Qty",
+      headerName: "Số Lượng Sản Phẩm",
       type: "number",
       minWidth: 130,
       flex: 0.7,
@@ -43,7 +43,7 @@ const AllRefundOrders = () => {
 
     {
       field: "total",
-      headerName: "Total",
+      headerName: "Tổng Cộng",
       type: "number",
       minWidth: 130,
       flex: 0.8,

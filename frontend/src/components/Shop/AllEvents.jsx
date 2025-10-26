@@ -25,22 +25,22 @@ const AllEvents = () => {
   }
 
   const columns = [
-    { field: "id", headerName: "Product Id", minWidth: 150, flex: 0.7 },
+    { field: "id", headerName: " Id Sản Phẩm", minWidth: 150, flex: 0.7 },
     {
       field: "name",
-      headerName: "Name",
+      headerName: "Tên Sản Phẩm",
       minWidth: 180,
       flex: 1.4,
     },
     {
       field: "price",
-      headerName: "Price",
+      headerName: "Giá",
       minWidth: 100,
       flex: 0.6,
     },
     {
       field: "Stock",
-      headerName: "Stock",
+      headerName: "Tồn Kho",
       type: "number",
       minWidth: 80,
       flex: 0.5,
@@ -48,7 +48,7 @@ const AllEvents = () => {
 
     {
       field: "sold",
-      headerName: "Sold out",
+      headerName: "Đã Bán",
       type: "number",
       minWidth: 130,
       flex: 0.6,
@@ -57,7 +57,7 @@ const AllEvents = () => {
       field: "Preview",
       flex: 0.8,
       minWidth: 100,
-      headerName: "",
+      headerName: "Xem Sản Phẩm",
       type: "number",
       sortable: false,
       renderCell: (params) => {
@@ -78,14 +78,14 @@ const AllEvents = () => {
       field: "Delete",
       flex: 0.8,
       minWidth: 120,
-      headerName: "",
+      headerName: " Xóa Sản Phẩm",
       type: "number",
       sortable: false,
       renderCell: (params) => {
         return (
           <>
             <Button
-            onClick={() => handleDelete(params.id)}
+              onClick={() => handleDelete(params.id)}
             >
               <AiOutlineDelete size={20} />
             </Button>
@@ -98,7 +98,7 @@ const AllEvents = () => {
   const row = [];
 
   events &&
-  events.forEach((item) => {
+    events.forEach((item) => {
       row.push({
         id: item._id,
         name: item.name,
