@@ -8,36 +8,36 @@ const AdPopup = () => {
   // Danh sách 5 quảng cáo khác nhau
   const ads = [
     {
-      img: "https://down-vn.img.susercontent.com/file/vn-11134258-820l4-mfwntmbxdg5r05.webp",
-      title: "Hàng Mới Về Sàn 🎉",
-      desc: "Giảm giá đến 50% cho sản phẩm mới ra mắt!",
-      link: "/products",
-    },
-    {
-      img: "https://png.pngtree.com/template/20220330/ourlarge/pngtree-e-commerce-red-skin-care-products-moisturizing-set-beauty-banner-image_909477.jpg",
-      title: "Siêu Sale Mỹ Phẩm 💄",
-      desc: "Mua 1 tặng 1 cho tất cả sản phẩm dưỡng da!",
-      link: "/products",
-    },
-    {
-      img: "https://img.pikbest.com/background/20220119/red-e-commerce-product-promotion-background-picture_6224800.jpg!sw800",
-      title: "Flash Sale Cuối Tuần ⚡",
-      desc: "Giảm giá sốc chỉ hôm nay – Đừng bỏ lỡ!",
-      link: "/products",
-    },
-    {
-      img: "https://png.pngtree.com/png-vector/20230722/ourmid/pngtree-new-arrival-sale-banner-design-vector-png-image_8362190.png",
-      title: "Hàng Mới Ra Mắt 🚀",
-      desc: "Cập nhật xu hướng mới nhất – giá cực hời!",
-      link: "/products",
-    },
-    {
-      img: "https://graphicsfamily.com/wp-content/uploads/edd/2022/12/E-commerce-Product-Banner-Design-scaled.jpg",
-      title: "Ưu Đãi Đặc Biệt 🎁",
-      desc: "Giảm thêm 20% khi thanh toán qua ShopeePay!",
-      link: "/products",
-    },
-  ];
+    img: "https://cdnv2.tgdd.vn/mwg-static/tgdd/Banner/f3/2c/f32c5b6d226b1346b9734f6dd0f34441.png",
+    title: "Hàng Công Nghệ Mới Về 🎉",
+    desc: "Giảm giá đến 50% cho laptop, điện thoại và phụ kiện mới nhất!",
+    link: "/products",
+  },
+  {
+    img: "https://www.hoco.vn/data/Product/tai-nghe-airpods-ew03-plus-co-pop-up-LnQFQotzor9BAHCiX3D4.jpg",
+    title: "Siêu Sale Tai Nghe 🎧",
+    desc: "Mua 1 tặng 1 – Âm thanh đỉnh cao, giá cực thấp!",
+    link: "/products",
+  },
+  {
+    img: "https://vending-cdn.kootoro.com/torov-cms/upload/image/1685592825763-gi%C3%A1%20qu%E1%BA%A3ng%20c%C3%A1o%20tr%C3%AAn%20tivi.jpg",
+    title: "Flash Sale TV & Màn Hình ⚡",
+    desc: "Giảm giá sốc lên đến 50% – chỉ trong hôm nay!",
+    link: "/products",
+  },
+  {
+    img: "https://cdn2.cellphones.com.vn/insecure/rs:fill:1036:450/q:90/plain/https://dashboard.cellphones.com.vn/storage/690x300_iPhone_17_Pro_Opensale_v3.png",
+    title: "Siêu Phẩm Smartphone 🚀",
+    desc: "Cập nhật mẫu điện thoại hot nhất – giá chỉ từ 30.99 triệu!",
+    link: "/products",
+  },
+  {
+    img: "https://img.freepik.com/free-psd/electronic-gadgets-sale-web-banner-template_23-2149823854.jpg",
+    title: "Ưu Đãi Đặc Biệt 🎁",
+    desc: "Giảm thêm 10% khi thanh toán bằng ví điện tử!",
+    link: "/products",
+  },
+];
 
   useEffect(() => {
     // Chọn ngẫu nhiên 1 quảng cáo
