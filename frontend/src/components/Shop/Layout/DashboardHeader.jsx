@@ -13,7 +13,7 @@ const DashboardHeader = () => {
       <div>
         <Link to="/">
           <img
-            src="https://tse2.mm.bing.net/th/id/OIP.WgoDlSN5TL-p_u5OEYhPVQHaDO?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3"
+            src="https://i.postimg.cc/02N1SrVQ/z7182359798450-de2505e6bf07a8236cf420eede11cf00-removebg-preview.png"
             alt=""
             className="cursor-pointer h-[80px] object-contain"
           />

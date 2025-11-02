@@ -59,7 +59,7 @@ const Header = ({ activeHeading }) => {
           <div>
             <Link to="/">
               <img
-                src="https://tse2.mm.bing.net/th/id/OIP.WgoDlSN5TL-p_u5OEYhPVQHaDO?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3"
+                src="https://i.postimg.cc/02N1SrVQ/z7182359798450-de2505e6bf07a8236cf420eede11cf00-removebg-preview.png"
                 alt="Logo"
                 className="cursor-pointer h-[80px] object-contain"
               />
@@ -72,7 +72,7 @@ const Header = ({ activeHeading }) => {
               placeholder="Search Product..."
               value={searchTerm}
               onChange={handleSearchChange}
-              className="h-[40px] w-full px-2 border-[#3957db] border-[2px] rounded-md"
+              className="h-[40px] w-full px-2 border-[#39a8db] border-[2px] rounded-md"
             />
             <AiOutlineSearch
               size={30}
@@ -111,7 +111,7 @@ const Header = ({ activeHeading }) => {
       </div>
       <div
         className={`${active === true ? "shadow-sm fixed top-0 left-0 z-10" : null
-          } transition hidden 800px:flex items-center justify-between w-full bg-[#3321c8] h-[70px]`}
+          } transition hidden 800px:flex items-center justify-between w-full bg-[#0843c4] h-[70px]`}
       >
         <div
           className={`${styles.section} relative ${styles.noramlFlex} justify-between`}
@@ -217,7 +217,7 @@ const Header = ({ activeHeading }) => {
           <div>
             <Link to="/">
               <img
-                src="https://tse2.mm.bing.net/th/id/OIP.WgoDlSN5TL-p_u5OEYhPVQHaDO?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3"
+                src="https://i.postimg.cc/02N1SrVQ/z7182359798450-de2505e6bf07a8236cf420eede11cf00-removebg-preview.png"
                 alt=""
                 className="cursor-pointer h-[50px] object-contain"
               />

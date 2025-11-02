@@ -37,7 +37,7 @@ const Footer = () => {
       <div className="grid grid-cols-1 sm:gird-cols-3 lg:grid-cols-4 gap-6 sm:px-8 px-5 py-16 sm:text-center">
         <ul className="px-5 text-center sm:text-start flex sm:block flex-col items-center">
           <img
-            src="https://free-images.com/md/5be5/logo_iuh_png.jpg"
+            src="https://i.postimg.cc/02N1SrVQ/z7182359798450-de2505e6bf07a8236cf420eede11cf00-removebg-preview.png"
             alt=""
             className="cursor-pointer h-[100px] object-contain"
           />
