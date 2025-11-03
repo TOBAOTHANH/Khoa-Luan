@@ -36,7 +36,7 @@ const Categories = () => {
               <img
                 src={i.image_Url}
                 alt={i.title}
-                className="h-12 md:h-14 object-contain mb-2 select-none pointer-events-none"
+                className="h-20 md:h-24 object-contain mb-3 select-none pointer-events-none"
                 loading="lazy"
               />
               <h5 className="text-sm md:text-base font-medium leading-tight line-clamp-2">

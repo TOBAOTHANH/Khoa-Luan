@@ -16,7 +16,7 @@ const Navbar = ({ active }) => {
         <div
           className="
             rounded-full
-            bg-gradient-to-r from-[#003366] to-[#00AEEF]
+            bg-gradient-to-r from-[#065fb8] to-[#00AEEF]
             backdrop-blur
             px-2 py-1
             shadow-lg shadow-black/20

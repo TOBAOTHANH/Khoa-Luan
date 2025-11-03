@@ -4,6 +4,7 @@ import styles from "../../styles/styles";
 import { categoriesData } from "../../static/data";
 import {
   AiOutlineHeart,
+  AiOutlinePhone,
   AiOutlineSearch,
   AiOutlineShoppingCart,
 } from "react-icons/ai";
@@ -78,7 +79,7 @@ const Header = ({ activeHeading }) => {
               size={30}
               className="absolute right-2 top-1.5 cursor-pointer"
             />
-            {searchData && searchData.length !== 0 ? (
+           {searchTerm && searchData && searchData.length !== 0 ? (
               <div className="absolute min-h-[30vh] bg-slate-50 shadow-sm-2 z-[9] p-4">
                 {searchData &&
                   searchData.map((i, index) => {
@@ -98,6 +99,16 @@ const Header = ({ activeHeading }) => {
               </div>
             ) : null}
           </div>
+          {/* hotline và bán hàng */}
+          <div className="flex items-center space-x-4 bg-white p-3 rounded-md shadow-md">
+            <div className="bg-blue-500 text-white p-3 rounded-full">
+              <AiOutlinePhone size={20} />
+            </div>
+            <div className="text-black font-bold">
+              <div className="text-sm">Hotline:</div>
+              <div className="text-xl">0792.890.890</div>
+            </div>  
+          </div>
 
           <div className={`${styles.button}`}>
             <Link to={`${isSeller ? "/dashboard" : "/shop-login"}`}>
@@ -110,8 +121,9 @@ const Header = ({ activeHeading }) => {
         </div>
       </div>
       <div
-        className={`${active === true ? "shadow-sm fixed top-0 left-0 z-10" : null
-          } transition hidden 800px:flex items-center justify-between w-full bg-[#0843c4] h-[70px]`}
+        className={`${
+          active === true ? "shadow-sm fixed top-0 left-0 z-10" : null
+        } transition hidden 800px:flex items-center justify-between w-full bg-[#0843c4] h-[70px]`}
       >
         <div
           className={`${styles.section} relative ${styles.noramlFlex} justify-between`}
@@ -202,8 +214,9 @@ const Header = ({ activeHeading }) => {
 
       {/* mobile header */}
       <div
-        className={`${active === true ? "shadow-sm fixed top-0 left-0 z-10" : null
-          }
+        className={`${
+          active === true ? "shadow-sm fixed top-0 left-0 z-10" : null
+        }
       w-full h-[60px] bg-[#fff] z-50 top-0 left-0 shadow-sm 800px:hidden`}
       >
         <div className="w-full flex items-center justify-between">
