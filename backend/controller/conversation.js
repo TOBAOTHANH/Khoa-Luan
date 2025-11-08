@@ -11,18 +11,28 @@ router.post(
       try {
         const { groupTitle, userId, sellerId } = req.body;
   
-        const isConversationExist = await Conversation.findOne({ groupTitle });
+        // Kiểm tra xem đã có conversation giữa userId và sellerId chưa
+        // (không phụ thuộc vào groupTitle để tránh duplicate khi click vào sản phẩm khác nhau)
+        const isConversationExist = await Conversation.findOne({
+          members: { $all: [userId, sellerId] }
+        });
   
         if (isConversationExist) {
-          const conversation = isConversationExist;
+          // Nếu đã có conversation, cập nhật groupTitle nếu cần và trả về conversation hiện có
+          if (groupTitle && isConversationExist.groupTitle !== groupTitle) {
+            isConversationExist.groupTitle = groupTitle;
+            await isConversationExist.save();
+          }
           res.status(201).json({
             success: true,
-            conversation,
+            conversation: isConversationExist,
           });
         } else {
+          // Tạo conversation mới với groupTitle từ userId + sellerId để đảm bảo unique
+          const newGroupTitle = groupTitle || `${userId}_${sellerId}`;
           const conversation = await Conversation.create({
             members: [userId, sellerId],
-            groupTitle: groupTitle,
+            groupTitle: newGroupTitle,
           });
   
           res.status(201).json({
@@ -31,7 +41,7 @@ router.post(
           });
         }
       } catch (error) {
-        return next(new ErrorHandler(error.response.message), 500);
+        return next(new ErrorHandler(error.response?.message || error.message), 500);
       }
     })
 );

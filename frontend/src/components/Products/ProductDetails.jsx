@@ -90,9 +90,12 @@ const ProductDetails = ({ data }) => {
 
   const handleMessageSubmit = async () => {
     if (isAuthenticated) {
-      const groupTitle = data._id + user._id;
+      // Tạo groupTitle từ userId + sellerId để đảm bảo mỗi cặp user-seller chỉ có 1 conversation
+      // Thay vì dùng product._id để tránh tạo nhiều conversation cho cùng 1 shop
       const userId = user._id;
       const sellerId = data.shop._id;
+      const groupTitle = `${userId}_${sellerId}`;
+      
       await axios
         .post(`${server}/conversation/create-new-conversation`, {
           groupTitle,
@@ -103,7 +106,7 @@ const ProductDetails = ({ data }) => {
           navigate(`/inbox?${res.data.conversation._id}`);
         })
         .catch((error) => {
-          toast.error(error.response.data.message);
+          toast.error(error.response?.data?.message || "Failed to create conversation");
         });
     } else {
       toast.error("Please login to create a conversation");

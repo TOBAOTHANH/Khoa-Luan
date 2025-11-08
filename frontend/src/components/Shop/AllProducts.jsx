@@ -1,7 +1,7 @@
 import { Button } from '@mui/material';
 import { DataGrid } from "@mui/x-data-grid";
 import React, { useEffect } from "react";
-import { AiOutlineDelete, AiOutlineEye } from "react-icons/ai";
+import { AiOutlineDelete, AiOutlineEye, AiOutlineEdit } from "react-icons/ai";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { getAllProductsShop } from "../../redux/actions/product";
@@ -67,6 +67,25 @@ const AllProducts = () => {
             <Link to={`/product/${params.id}`}>
               <Button>
                 <AiOutlineEye size={20} />
+              </Button>
+            </Link>
+          </>
+        );
+      },
+    },
+    {
+      field: "Edit",
+      flex: 0.8,
+      minWidth: 100,
+      headerName: "Chỉnh Sửa Sản Phẩm",
+      type: "number",
+      sortable: false,
+      renderCell: (params) => {
+        return (
+          <>
+            <Link to={`/dashboard-edit-product/${params.id}`}>
+              <Button>
+                <AiOutlineEdit size={20} />
               </Button>
             </Link>
           </>

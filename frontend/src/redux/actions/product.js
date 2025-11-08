@@ -134,3 +134,52 @@ export const getAllProducts = () => async (dispatch) => {
     });
   }
 };
+
+// get single product by id
+export const getProductById = (id) => async (dispatch) => {
+  try {
+    dispatch({
+      type: "getProductByIdRequest",
+    });
+
+    const { data } = await axios.get(`${server}/product/get-product/${id}`);
+    dispatch({
+      type: "getProductByIdSuccess",
+      payload: data.product,
+    });
+  } catch (error) {
+    dispatch({
+      type: "getProductByIdFailed",
+      payload: error.response?.data?.message || "Failed to get product",
+    });
+  }
+};
+
+// update product of a shop
+export const updateProduct = (id, newForm) => async (dispatch) => {
+  try {
+    dispatch({
+      type: "updateProductRequest",
+    });
+
+    const config = { headers: { "Content-Type": "multipart/form-data" } };
+    const { data } = await axios.put(
+      `${server}/product/update-shop-product/${id}`,
+      newForm,
+      {
+        ...config,
+        withCredentials: true,
+      }
+    );
+
+    dispatch({
+      type: "updateProductSuccess",
+      payload: data.product,
+    });
+  } catch (error) {
+    dispatch({
+      type: "updateProductFailed",
+      payload: error.response?.data?.message || "Failed to update product",
+    });
+  }
+};

@@ -52,7 +52,37 @@ const DashboardMessages = () => {
           }
         );
 
-        setConversations(resonse.data.conversations);
+        // Loại bỏ duplicate conversations dựa trên members
+        // Nếu có nhiều conversation với cùng members (userId và sellerId), chỉ giữ lại conversation mới nhất
+        const conversations = resonse.data.conversations || [];
+        const uniqueConversations = [];
+        const seenMembers = new Map();
+
+        conversations.forEach((conv) => {
+          // Tạo key từ members đã sắp xếp để so sánh
+          const membersKey = conv.members.sort().join('_');
+          
+          if (!seenMembers.has(membersKey)) {
+            seenMembers.set(membersKey, conv);
+            uniqueConversations.push(conv);
+          } else {
+            // Nếu đã có conversation với cùng members, so sánh thời gian và giữ lại conversation mới hơn
+            const existingConv = seenMembers.get(membersKey);
+            const existingDate = new Date(existingConv.updatedAt || existingConv.createdAt || 0);
+            const currentDate = new Date(conv.updatedAt || conv.createdAt || 0);
+            
+            if (currentDate > existingDate) {
+              // Thay thế conversation cũ bằng conversation mới hơn
+              const index = uniqueConversations.findIndex(c => c._id === existingConv._id);
+              if (index !== -1) {
+                uniqueConversations[index] = conv;
+                seenMembers.set(membersKey, conv);
+              }
+            }
+          }
+        });
+
+        setConversations(uniqueConversations);
       } catch (error) {
         // console.log(error);
       }

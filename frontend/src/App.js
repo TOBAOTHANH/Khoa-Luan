@@ -30,6 +30,7 @@ import { loadSeller, loadUser } from './redux/actions/user';
 import {
   ShopDashboardPage,
   ShopCreateProduct,
+  ShopEditProduct,
   ShopAllProducts,
   ShopCreateEvent,
   ShopAllEvents,
@@ -192,6 +193,14 @@ const App = () => {
             element={
               <SellerProtectedRoute>
                 <ShopCreateProduct />
+              </SellerProtectedRoute>
+            }
+          />
+          <Route
+            path='dashboard-edit-product/:id'
+            element={
+              <SellerProtectedRoute>
+                <ShopEditProduct />
               </SellerProtectedRoute>
             }
           />

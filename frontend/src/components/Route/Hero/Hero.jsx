@@ -69,7 +69,7 @@ const rightCards = [
     title: "LAPTOP VĂN PHÒNG",
     sub: "› Bảo hành lên đến 36 tháng",
     price: "3.950.000đ",
-    to: "/products?tag=laptop-office",
+    to: "/products?category=Laptop",
   },
   {
     id: "gaming",
@@ -78,7 +78,7 @@ const rightCards = [
     title: "LAPTOP GAMING/ĐỒ HOẠ",
     sub: "› Bảo hành lên đến 36 tháng",
     price: "16.499.000đ",
-    to: "/products?tag=laptop-gaming",
+    to: "/products?category=Laptop",
   },
 ];
 

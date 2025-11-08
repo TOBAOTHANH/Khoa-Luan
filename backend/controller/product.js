@@ -126,6 +126,129 @@ router.delete(
     }
   })
 );
+
+// get single product by id
+router.get(
+  "/get-product/:id",
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const product = await Product.findById(req.params.id);
+      if (!product) {
+        return next(new ErrorHandler("Product not found with this id!", 404));
+      }
+      res.status(200).json({
+        success: true,
+        product,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error, 400));
+    }
+  })
+);
+
+// update product of a shop
+router.put(
+  "/update-shop-product/:id",
+  isSeller,
+  upload.array("images"),
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const productId = req.params.id;
+      const product = await Product.findById(productId);
+      
+      if (!product) {
+        return next(new ErrorHandler("Product not found with this id!", 404));
+      }
+
+      // Check if seller is authenticated
+      if (!req.seller || !req.seller._id) {
+        return next(new ErrorHandler("Seller not authenticated!", 401));
+      }
+
+      // Check if seller owns this product
+      // Convert both to string for comparison (shopId might be string or ObjectId)
+      const productShopId = product.shopId ? product.shopId.toString() : null;
+      const sellerId = req.seller._id ? req.seller._id.toString() : null;
+      
+      // Debug logging (can be removed later)
+      console.log("Product ShopId:", productShopId);
+      console.log("Seller ID:", sellerId);
+      console.log("Match:", productShopId === sellerId);
+      
+      if (productShopId !== sellerId) {
+        return next(new ErrorHandler("You are not authorized to update this product!", 403));
+      }
+
+      // Handle images
+      // If existingImagesToKeep is provided, use it; otherwise keep all existing images
+      let imagesToKeep = [];
+      if (req.body.existingImagesToKeep) {
+        try {
+          imagesToKeep = JSON.parse(req.body.existingImagesToKeep);
+        } catch (e) {
+          imagesToKeep = [];
+        }
+      } else {
+        imagesToKeep = product.images || [];
+      }
+
+      // Handle new images if provided
+      if (req.files && req.files.length > 0) {
+        // Delete old images that are not in the keep list
+        product.images.forEach((imageUrl) => {
+          if (!imagesToKeep.includes(imageUrl)) {
+            const filename = imageUrl;
+            const filePath = `uploads/${filename}`;
+            fs.unlink(filePath, (err) => {
+              if (err) {
+                console.log(err);
+              }
+            });
+          }
+        });
+        // Add new images
+        const files = req.files;
+        const imageUrls = files.map((file) => `${file.filename}`);
+        product.images = [...imagesToKeep, ...imageUrls];
+      } else {
+        // No new images, just update the existing images list
+        // Delete images that are not in the keep list
+        product.images.forEach((imageUrl) => {
+          if (!imagesToKeep.includes(imageUrl)) {
+            const filename = imageUrl;
+            const filePath = `uploads/${filename}`;
+            fs.unlink(filePath, (err) => {
+              if (err) {
+                console.log(err);
+              }
+            });
+          }
+        });
+        product.images = imagesToKeep;
+      }
+
+      // Update product fields
+      if (req.body.name) product.name = req.body.name;
+      if (req.body.description) product.description = req.body.description;
+      if (req.body.category) product.category = req.body.category;
+      if (req.body.tags !== undefined) product.tags = req.body.tags;
+      if (req.body.originalPrice !== undefined) product.originalPrice = req.body.originalPrice;
+      if (req.body.discountPrice !== undefined) product.discountPrice = req.body.discountPrice;
+      if (req.body.stock !== undefined) product.stock = req.body.stock;
+
+      await product.save();
+
+      res.status(200).json({
+        success: true,
+        product,
+        message: "Product updated successfully!",
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error, 400));
+    }
+  })
+);
+
 // get all products
 router.get(
   "/get-all-products",
