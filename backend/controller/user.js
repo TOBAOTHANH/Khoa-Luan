@@ -42,7 +42,7 @@ router.post("/create-user", upload.single("file"), async (req, res, next) => {
     const activationToken = createActivationToken(user);
     const isProduction = process.env.NODE_ENV === "production";
     const activationUrl = isProduction
-      ? `https://frontend-one-kappa-74.vercel.app/activation/${activationToken}`
+      ? `https://khoa-luan-theta.vercel.app//activation/${activationToken}`
       : `http://localhost:3000/activation/${activationToken}`;
     try {
       await sendMail({
