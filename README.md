@@ -277,7 +277,7 @@ Khoa-Luan/
 
 ## 👥 Tác Giả
 
-**Nhóm Long Nam**
+**Nhóm Thành Ân**
 
 ## 📄 License
 
