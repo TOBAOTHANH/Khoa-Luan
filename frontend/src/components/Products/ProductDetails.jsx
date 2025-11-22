@@ -185,7 +185,7 @@ const ProductDetails = ({ data }) => {
                         className="cursor-pointer "
                         onClick={() => removeFromWishlistHandler(data)}
                         color={click ? "red" : "#333"}
-                        title="Remove from wishlist"
+                        title="Xóa khỏi danh sách yêu thích"
                       />
                     ) : (
                       <AiOutlineHeart
@@ -193,18 +193,19 @@ const ProductDetails = ({ data }) => {
                         className="cursor-pointer "
                         onClick={() => addToWishlistHandler(data)}
                         color={click ? "red" : "#333"}
-                        title="Add to wishlist"
+                        title="Thêm vào danh sách yêu thích"
                       />
                     )}
                   </div>
                 </div>
                 <div
-                  className={`${styles.button} !mt-6 !rounded !h-11 flex items-center`}
+                  className="!mt-6 w-full"
                   onClick={() => addToCartHandler(data._id)}
                 >
-                  <span className="text-white flex items-center">
-                    Add to cart <AiOutlineShoppingCart className="ml-1" />
-                  </span>
+                  <button className="w-full bg-gradient-to-r from-[#f63b60] to-[#ff6b8a] hover:from-[#e02d4f] hover:to-[#ff5577] text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 ease-in-out flex items-center justify-center gap-2 whitespace-nowrap">
+                    <AiOutlineShoppingCart size={20} />
+                    <span>Thêm vào giỏ hàng</span>
+                  </button>
                 </div>
                 <div className="flex items-center pt-8">
                   <Link to={`/shop/preview/${data?.shop._id}`}>
@@ -224,14 +225,13 @@ const ProductDetails = ({ data }) => {
                       <Ratings rating={data?.ratings} />
                     </h5>
                   </div>
-                  <div
-                    className={`${styles.button} bg-[#6443d1] mt-4 !rounded !h-11`}
+                  <button
+                    className="w-full bg-gradient-to-r from-[#6443d1] to-[#7c5dd8] hover:from-[#5335b0] hover:to-[#6443d1] text-white font-semibold py-2.5 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 ease-in-out flex items-center justify-center gap-2 whitespace-nowrap mt-4"
                     onClick={handleMessageSubmit}
                   >
-                    <span className="text-white flex items-center">
-                      Send Message <AiOutlineMessage className="ml-1" />
-                    </span>
-                  </div>
+                    <AiOutlineMessage size={18} />
+                    <span>Gửi tin nhắn</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -257,7 +257,7 @@ const ProductDetailsInfo = ({ data, products, totalReviewsLength, averageRating 
             }
             onClick={() => setActive(1)}
           >
-            Product Details
+            Chi tiết sản phẩm
           </h5>
           {active === 1 ? (
             <div className={`${styles.active_indicator}`} />
@@ -270,7 +270,7 @@ const ProductDetailsInfo = ({ data, products, totalReviewsLength, averageRating 
             }
             onClick={() => setActive(2)}
           >
-            Product Reviews
+            Đánh giá sản phẩm
           </h5>
           {active === 2 ? (
             <div className={`${styles.active_indicator}`} />
@@ -283,7 +283,7 @@ const ProductDetailsInfo = ({ data, products, totalReviewsLength, averageRating 
             }
             onClick={() => setActive(3)}
           >
-            Seller Information
+            Thông tin người bán
           </h5>
           {active === 3 ? (
             <div className={`${styles.active_indicator}`} />
@@ -319,7 +319,7 @@ const ProductDetailsInfo = ({ data, products, totalReviewsLength, averageRating 
 
           <div className="w-full flex justify-center">
             {data && data.reviews.length === 0 && (
-              <h5>No Reviews have for this product!</h5>
+              <h5>Chưa có đánh giá cho sản phẩm này!</h5>
             )}
           </div>
         </div>
@@ -336,7 +336,7 @@ const ProductDetailsInfo = ({ data, products, totalReviewsLength, averageRating 
                 />
                 <div className="pl-3">
                   <h3 className={`${styles.shop_name}`}>{data.shop.name}</h3>
-                  <h5 className="pb-2 text-[15px]">(4/5) Ratings</h5>
+                  <h5 className="pb-2 text-[15px]">(4/5) Đánh giá</h5>
                 </div>
               </div>
             </Link>
@@ -357,13 +357,13 @@ const ProductDetailsInfo = ({ data, products, totalReviewsLength, averageRating 
                 </span>
               </h5>
               <h5 className="font-[600] pt-3">
-                Total Reviews: <span className="font-[500]">{totalReviewsLength}</span>
+                Tổng đánh giá: <span className="font-[500]">{totalReviewsLength}</span>
               </h5>
               <Link to="/">
                 <div
                   className={`${styles.button} !rounded-[4px] !h-[39,5px] mt-3`}
                 >
-                  <h4 className="text-white">Visit Shop</h4>
+                  <h4 className="text-white">Xem cửa hàng</h4>
                 </div>
               </Link>
             </div>

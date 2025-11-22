@@ -7,6 +7,7 @@ import { getAllOrdersOfShop } from "../../redux/actions/order";
 import { server } from "../../server";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { getOrderStatusInVietnamese, getOrderStatusOptions } from "../../utils/orderStatus";
 
 const OrderDetails = () => {
   const { orders, isLoading } = useSelector((state) => state.order);
@@ -37,7 +38,7 @@ const OrderDetails = () => {
         { withCredentials: true }
       )
       .then((res) => {
-        toast.success("Order updated!");
+        toast.success("Đã cập nhật đơn hàng!");
         setStatus(res.data.updatedStatus || status); // Giữ nguyên trạng thái hoặc cập nhật từ phản hồi
         navigate("/dashboard-orders");
       })
@@ -48,16 +49,9 @@ const OrderDetails = () => {
   //-------------------------------------------------///
   const options = useMemo(() => {
     if (data?.status === "Processing refund" || data?.status === "Refund Success") {
-      return ["Processing refund", "Refund Success"];
+      return getOrderStatusOptions(true);
     }
-    return [
-      "Processing",
-      "Transferred to delivery partner",
-      "Shipping",
-      "Received",
-      "On the way",
-      "Delivered",
-    ];
+    return getOrderStatusOptions(false);
   }, [data?.status]);
   //-------------------------------------------------///
 
@@ -71,7 +65,7 @@ const OrderDetails = () => {
         { withCredentials: true }
       )
       .then((res) => {
-        toast.success("Order updated!");
+        toast.success("Đã cập nhật đơn hàng!");
         dispatch(getAllOrdersOfShop(seller._id));
       })
       .catch((error) => {
@@ -87,23 +81,23 @@ const OrderDetails = () => {
       <div className="w-full flex items-center justify-between">
         <div className="flex items-center">
           <BsFillBagFill size={30} color="crimson" />
-          <h1 className="pl-2 text-[25px]">Order Details</h1>
+          <h1 className="pl-2 text-[25px]">Chi tiết đơn hàng</h1>
         </div>
         <Link to="/dashboard-orders">
           <div
             className={`${styles.button} !bg-[#fce1e6] !rounded-[4px] text-[#e94560] font-[600] !h-[45px] text-[18px]`}
           >
-            Order List
+            Danh sách đơn hàng
           </div>
         </Link>
       </div>
 
       <div className="w-full flex items-center justify-between pt-6">
         <h5 className="text-[#00000084]">
-          Order ID: <span>#{data?._id?.slice(0, 8)}</span>
+          Mã đơn hàng: <span>#{data?._id?.slice(0, 8)}</span>
         </h5>
         <h5 className="text-[#00000084]">
-          Placed on: <span>{data?.createdAt?.slice(0, 10)}</span>
+          Ngày đặt: <span>{data?.createdAt?.slice(0, 10)}</span>
         </h5>
       </div>
 
@@ -129,14 +123,14 @@ const OrderDetails = () => {
 
       <div className="border-t w-full text-right">
         <h5 className="pt-3 text-[18px]">
-          Total Price: <strong>US${data?.totalPrice}</strong>
+          Tổng tiền: <strong>US${data?.totalPrice}</strong>
         </h5>
       </div>
       <br />
       <br />
       <div className="w-full 800px:flex items-center">
         <div className="w-full 800px:w-[60%]">
-          <h4 className="pt-3 text-[20px] font-[600]">Shipping Address:</h4>
+          <h4 className="pt-3 text-[20px] font-[600]">Địa chỉ giao hàng:</h4>
           <h4 className="pt-3 text-[20px]">
             {data?.shippingAddress.address1 +
               " " +
@@ -147,16 +141,16 @@ const OrderDetails = () => {
           <h4 className=" text-[20px]">{data?.user?.phoneNumber}</h4>
         </div>
         <div className="w-full 800px:w-[40%]">
-          <h4 className="pt-3 text-[20px]">Payment Info:</h4>
+          <h4 className="pt-3 text-[20px]">Thông tin thanh toán:</h4>
           <h4>
-            Status:{" "}
-            {data?.paymentInfo?.status ? data?.paymentInfo?.status : "Not Paid"}
+            Trạng thái:{" "}
+            {data?.paymentInfo?.status ? getOrderStatusInVietnamese(data?.paymentInfo?.status) : "Chưa thanh toán"}
           </h4>
         </div>
       </div>
       <br />
       <br />
-      <h4 className="pt-3 text-[20px] font-[600]">Order Status:</h4>
+      <h4 className="pt-3 text-[20px] font-[600]">Trạng thái đơn hàng:</h4>
       {data?.status !== "Processing refund" && data?.status !== "Refund Success" && (
         <select
           value={status}
@@ -164,8 +158,8 @@ const OrderDetails = () => {
           className="w-[200px] mt-2 border h-[35px] rounded-[5px]"
         >
           {options.map((option, index) => (
-            <option value={option} key={index}>
-              {option}
+            <option value={option.value} key={index}>
+              {option.label}
             </option>
           ))}
         </select>
@@ -176,31 +170,25 @@ const OrderDetails = () => {
             onChange={(e) => setStatus(e.target.value)}
             className="w-[200px] mt-2 border h-[35px] rounded-[5px]"
           >
-            {[
-              "Processing refund",
-              "Refund Success",
-            ]
+            {getOrderStatusOptions(true)
               .slice(
-                [
-                  "Processing refund",
-                  "Refund Success",
-                ].indexOf(data?.status)
+                getOrderStatusOptions(true).findIndex(opt => opt.value === data?.status)
               )
               .map((option, index) => (
-                <option value={option} key={index}>
-                  {option}
+                <option value={option.value} key={index}>
+                  {option.label}
                 </option>
               ))}
           </select>
         ) : null
       }
 
-      <div
-        className={`${styles.button} mt-5 !bg-[#FCE1E6] !rounded-[4px] text-[#E94560] font-[600] !h-[45px] text-[18px]`}
+      <button
+        className="w-full max-w-[300px] bg-gradient-to-r from-[#f63b60] to-[#ff6b8a] hover:from-[#e02d4f] hover:to-[#ff5577] text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 ease-in-out flex items-center justify-center gap-2 whitespace-nowrap mt-5"
         onClick={data?.status !== "Processing refund" ? orderUpdateHandler : refundOrderUpdateHandler}
       >
-        Update Status
-      </div>
+        <span>Cập nhật trạng thái</span>
+      </button>
     </div>
   );
 };

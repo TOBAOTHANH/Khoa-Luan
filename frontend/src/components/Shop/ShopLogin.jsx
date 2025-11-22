@@ -20,7 +20,7 @@ const ShopLogin = () => {
         { withCredentials: true }
       )
       .then((res) => {
-        toast.success("Login successfully");
+        toast.success("Đăng nhập thành công");
         navigate("/dashboard");
         window.location.reload(true);
       })

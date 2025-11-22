@@ -37,11 +37,11 @@ const ShopSettings = () => {
         withCredentials: true,
       })
       .then((response) => {
-        toast.success("Avatar updated successfully!");
+        toast.success("Đã cập nhật avatar thành công!");
         window.location.reload();
       })
       .catch((error) => {
-        toast.error(error.response?.data?.message || "Failed to update avatar.");
+        toast.error(error.response?.data?.message || "Cập nhật avatar thất bại.");
       });
   };
 
@@ -62,7 +62,7 @@ const ShopSettings = () => {
         { withCredentials: true }
       )
       .then((res) => {
-        toast.success("Shop info updated succesfully!");
+        toast.success("Đã cập nhật thông tin cửa hàng thành công!");
         dispatch(loadSeller());
       })
       .catch((error) => {

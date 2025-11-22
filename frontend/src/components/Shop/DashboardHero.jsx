@@ -8,6 +8,7 @@ import { getAllOrdersOfShop } from "../../redux/actions/order";
 import { getAllProductsShop } from "../../redux/actions/product";
 import { Button } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
+import { getOrderStatusInVietnamese } from "../../utils/orderStatus";
 
 const DashboardHero = () => {
   const dispatch = useDispatch();
@@ -73,7 +74,7 @@ const DashboardHero = () => {
     id: item._id,
     itemsQty: item.cart.reduce((acc, cartItem) => acc + (cartItem.qty || 0), 0),
     total: `US$ ${item.totalPrice || 0}`,
-    status: item.status || "",
+    status: getOrderStatusInVietnamese(item.status || ""),
   }));
 
   return (

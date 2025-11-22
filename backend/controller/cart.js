@@ -39,7 +39,7 @@ router.post("/", isAuthenticated, async (req, res) => {
 router.delete("/:id", isAuthenticated, async (req, res) => {
   try {
     await CartModel.findByIdAndDelete(req.params.id);
-    res.status(200).json({ message: "Item removed from cart" });
+    res.status(200).json({ message: "Đã xóa sản phẩm khỏi giỏ hàng" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

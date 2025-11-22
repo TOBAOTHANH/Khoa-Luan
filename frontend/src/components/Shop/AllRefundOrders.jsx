@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import Loader from "../Layout/Loader";
 import { getAllOrdersOfShop } from "../../redux/actions/order";
 import { AiOutlineArrowRight } from "react-icons/ai";
+import { getOrderStatusInVietnamese } from "../../utils/orderStatus";
 
 const AllRefundOrders = () => {
   const { orders, isLoading } = useSelector((state) => state.order);
@@ -78,7 +79,7 @@ const AllRefundOrders = () => {
         id: item._id,
         itemsQty: item.cart.length,
         total: "US$ " + item.totalPrice,
-        status: item.status,
+        status: getOrderStatusInVietnamese(item.status),
       });
     });
 

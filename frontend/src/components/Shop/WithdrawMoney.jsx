@@ -51,7 +51,7 @@ const WithdrawMoney = () => {
         { withCredentials: true }
       )
       .then((res) => {
-        toast.success("Withdraw method added successfully!");
+        toast.success("Đã thêm phương thức rút tiền thành công!");
         dispatch(loadSeller());
         setBankInfo({
           bankName: "",
@@ -73,18 +73,18 @@ const WithdrawMoney = () => {
         withCredentials: true,
       })
       .then((res) => {
-        toast.success("Withdraw method deleted successfully!");
+        toast.success("Đã xóa phương thức rút tiền thành công!");
         dispatch(loadSeller());
       });
   };
 
   const error = () => {
-    toast.error("You not have enough balance to withdraw!");
+    toast.error("Bạn không có đủ số dư để rút tiền!");
   };
 
   const withdrawHandler = async () => {
     if (withdrawAmount < 50 || withdrawAmount > availableBalance) {
-      toast.error("You can't withdraw this amount!");
+      toast.error("Bạn không thể rút số tiền này!");
     } else {
       const amount = withdrawAmount;
       await axios
@@ -94,7 +94,7 @@ const WithdrawMoney = () => {
           { withCredentials: true }
         )
         .then((res) => {
-          toast.success("Withdraw money request is successful!");
+          toast.success("Yêu cầu rút tiền thành công!");
         });
     }
   };
@@ -300,12 +300,12 @@ const WithdrawMoney = () => {
                         onChange={(e) => setWithdrawAmount(e.target.value)}
                         className="800px:w-[100px] w-[full] border 800px:mr-3 p-1 rounded"
                       />
-                      <div
-                        className={`${styles.button} !h-[42px] text-white`}
+                      <button
+                        className="bg-gradient-to-r from-[#f63b60] to-[#ff6b8a] hover:from-[#e02d4f] hover:to-[#ff5577] text-white font-semibold py-2.5 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 ease-in-out"
                         onClick={withdrawHandler}
                       >
                         Rút Tiền
-                      </div>
+                      </button>
                     </div>
                   </div>
                 ) : (
@@ -314,12 +314,12 @@ const WithdrawMoney = () => {
                       Không có phương thức rút tiền nào khả dụng!
                     </p>
                     <div className="w-full flex items-center">
-                      <div
-                        className={`${styles.button} text-[#fff] text-[18px] mt-4`}
+                      <button
+                        className="bg-gradient-to-r from-[#f63b60] to-[#ff6b8a] hover:from-[#e02d4f] hover:to-[#ff5577] text-white font-semibold py-2.5 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 ease-in-out mt-4"
                         onClick={() => setPaymentMethod(true)}
                       >
                         Thêm mới
-                      </div>
+                      </button>
                     </div>
                   </div>
                 )}

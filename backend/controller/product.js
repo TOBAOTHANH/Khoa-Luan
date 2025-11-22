@@ -115,11 +115,11 @@ router.delete(
       });
       const product = await Product.findByIdAndDelete(productId);
       if (!product) {
-        return next(new ErrorHandler("Product not found with this id!", 500));
+        return next(new ErrorHandler("Không tìm thấy sản phẩm với id này!", 500));
       }
       res.status(201).json({
         success: true,
-        message: "Product Deleted successfully!",
+        message: "Sản phẩm đã được xóa thành công!",
       });
     } catch (error) {
       return next(new ErrorHandler(error, 400));
@@ -134,7 +134,7 @@ router.get(
     try {
       const product = await Product.findById(req.params.id);
       if (!product) {
-        return next(new ErrorHandler("Product not found with this id!", 404));
+        return next(new ErrorHandler("Không tìm thấy sản phẩm với id này!", 404));
       }
       res.status(200).json({
         success: true,
@@ -157,12 +157,12 @@ router.put(
       const product = await Product.findById(productId);
       
       if (!product) {
-        return next(new ErrorHandler("Product not found with this id!", 404));
+        return next(new ErrorHandler("Không tìm thấy sản phẩm với id này!", 404));
       }
 
       // Check if seller is authenticated
       if (!req.seller || !req.seller._id) {
-        return next(new ErrorHandler("Seller not authenticated!", 401));
+        return next(new ErrorHandler("Người bán chưa được xác thực!", 401));
       }
 
       // Check if seller owns this product
@@ -176,7 +176,7 @@ router.put(
       console.log("Match:", productShopId === sellerId);
       
       if (productShopId !== sellerId) {
-        return next(new ErrorHandler("You are not authorized to update this product!", 403));
+        return next(new ErrorHandler("Bạn không có quyền cập nhật sản phẩm này!", 403));
       }
 
       // Handle images
@@ -241,7 +241,7 @@ router.put(
       res.status(200).json({
         success: true,
         product,
-        message: "Product updated successfully!",
+        message: "Sản phẩm đã được cập nhật thành công!",
       });
     } catch (error) {
       return next(new ErrorHandler(error, 400));
@@ -310,7 +310,7 @@ router.put(
    
       res.status(200).json({
         success: true,
-        message: "Reviwed succesfully!",
+        message: "Đánh giá thành công!",
       });
     } catch (error) {
       return next(new ErrorHandler(error, 400));

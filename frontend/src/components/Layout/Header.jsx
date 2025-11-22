@@ -110,14 +110,12 @@ const Header = ({ activeHeading }) => {
             </div>  
           </div>
 
-          <div className={`${styles.button}`}>
-            <Link to={`${isSeller ? "/dashboard" : "/shop-login"}`}>
-              <h1 className="text-[#fff] flex items-center">
-                {isSeller ? "Back Seller" : "Bán Hàng"}{" "}
-                <IoIosArrowForward className="ml-1" />
-              </h1>
-            </Link>
-          </div>
+          <Link to={`${isSeller ? "/dashboard" : "/shop-login"}`}>
+            <button className="bg-gradient-to-r from-[#0843c4] to-[#0a5cd4] hover:from-[#0638a0] hover:to-[#0843c4] text-white font-semibold py-2.5 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 ease-in-out flex items-center justify-center gap-2 whitespace-nowrap">
+              <span>{isSeller ? "Về trang bán hàng" : "Bán Hàng"}</span>
+              <IoIosArrowForward size={18} />
+            </button>
+          </Link>
         </div>
       </div>
       <div
@@ -135,7 +133,7 @@ const Header = ({ activeHeading }) => {
               <button
                 className={`h-[100%] w-full flex justify-between items-center pl-10 bg-white font-sans text-lg font-[500] select-none rounded-t-md`}
               >
-                Menu
+                Danh mục
               </button>
               <IoIosArrowDown
                 size={20}
