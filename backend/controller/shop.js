@@ -55,11 +55,11 @@ router.post('/create-shop', upload.single('file'), async (req, res, next) => {
     };
 
     const activationToken = createActivationToken(seller);
-    const activationUrl = `http://localhost:3000/seller/activation/${activationToken}`;
-    // const isProduction = process.env.NODE_ENV === 'production';
-    // const activationUrl = isProduction
-    //   ? `https://khoa-luan-theta.vercel.appseller/activation/${activationToken}`
-    //   : `http://localhost:3000/seller/activation/${activationToken}`;
+    // const activationUrl = `http://localhost:3000/seller/activation/${activationToken}`;
+    const isProduction = process.env.NODE_ENV === 'production';
+    const activationUrl = isProduction
+      ? `https://khoa-luan-gm4e78717-tobaothanhs-projects.vercel.app/activation/${activationToken}`
+      : `http://localhost:3000/seller/activation/${activationToken}`;
 
     // Gửi email kích hoạt
     await sendMail({
