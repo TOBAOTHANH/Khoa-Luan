@@ -11,15 +11,27 @@ import AdPopup from '../components/Layout/AdPopup'
 
 const HomePage = () => {
   return (
-    <div>
+    <div className="bg-gradient-to-b from-gray-50 via-white to-gray-50 min-h-screen">
       <AdPopup/>
       <Header activeHeading = {1} />
-      <Hero/>
-      <Categories/>
-      <BestDeals/>
-      <Events/>
-      <FeaturedProduct/>
-      <Sponsored/>
+      <div className="bg-gradient-to-b from-white to-gray-50">
+        <Hero/>
+      </div>
+      <div className="bg-white py-8">
+        <Categories/>
+      </div>
+      <div className="bg-gradient-to-b from-gray-50 to-white py-12">
+        <BestDeals/>
+      </div>
+      <div className="bg-white py-12">
+        <Events/>
+      </div>
+      <div className="bg-gradient-to-b from-gray-50 to-white py-12">
+        <FeaturedProduct/>
+      </div>
+      <div className="bg-white py-12">
+        <Sponsored/>
+      </div>
       <Footer/>
     </div>
   )

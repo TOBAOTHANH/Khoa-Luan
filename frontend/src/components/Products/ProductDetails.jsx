@@ -7,6 +7,7 @@ import {
   AiOutlineMessage,
   AiOutlineShoppingCart,
 } from "react-icons/ai";
+import { RxCross1 } from "react-icons/rx";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllProductsShop } from "../../redux/actions/product";
 import { backend_url, server } from "../../server";
@@ -18,6 +19,7 @@ import {
 import { addTocart } from "../../redux/actions/cart";
 import Ratings from "./Ratings";
 import axios from "axios";
+import AccessoryRecommendations from "./AccessoryRecommendations";
 
 const ProductDetails = ({ data }) => {
   const [count, setCount] = useState(1);
@@ -151,7 +153,7 @@ const ProductDetails = ({ data }) => {
               </div>
               <div className="w-full 800px:w-[50%] pt-5">
                 <h1 className={`${styles.productTitle}`}>{data.name}</h1>
-                <p>{data.description}</p>
+                {/* <p>{data.description}</p> */}
                 <div className="flex pt-3">
                   <h4 className={`${styles.productDiscountPrice}`}>
                     {data.discountPrice}$
@@ -207,6 +209,9 @@ const ProductDetails = ({ data }) => {
                     <span>Thêm vào giỏ hàng</span>
                   </button>
                 </div>
+                {/* Phụ kiện khuyến nghị */}
+                <AccessoryRecommendations product={data} />
+                
                 <div className="flex items-center pt-8">
                   <Link to={`/shop/preview/${data?.shop._id}`}>
                     <img
@@ -246,6 +251,12 @@ const ProductDetails = ({ data }) => {
 };
 const ProductDetailsInfo = ({ data, products, totalReviewsLength, averageRating }) => {
   const [active, setActive] = useState(1);
+  const { seller } = useSelector((state) => state.seller);
+  const { user } = useSelector((state) => state.user);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [selectedReview, setSelectedReview] = useState(null);
+  const [shopFeedback, setShopFeedback] = useState("");
+  const isShopOwner = seller?._id === data?.shop?._id || user?.role === "Seller";
 
   return (
     <div className="bg-[#f5f6fb] px-3 800px:px-10 py-2 rounded ">
@@ -301,25 +312,65 @@ const ProductDetailsInfo = ({ data, products, totalReviewsLength, averageRating 
         <div className="w-full min-h-[40vh] flex flex-col items-center py-3 overflow-y-scroll">
           {data &&
             data.reviews.map((item, index) => (
-              <div className="w-full flex my-2">
-                <img
-                  src={`${backend_url}${item.user?.avatar?.public_id}`}
-                  alt=""
-                  className="w-[50px] h-[50px] rounded-full"
-                />
-                <div className="pl-2 ">
-                  <div className="w-full flex items-center">
-                    <h1 className="font-[500] mr-3">{item.user.name}</h1>
-                    <Ratings rating={data?.ratings} />
+              <div key={index} className="w-full mb-6 p-4 bg-white rounded-lg shadow-md border border-gray-200">
+                <div className="flex items-start">
+                  <img
+                    src={`${backend_url}${item.user?.avatar?.public_id || item.user?.avatar?.url}`}
+                    alt={item.user?.name}
+                    className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
+                    onError={(e) => {
+                      e.target.src = "https://via.placeholder.com/50";
+                    }}
+                  />
+                  <div className="pl-4 flex-1">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-3">
+                        <h1 className="font-semibold text-gray-800">{item.user?.name || 'Khách hàng'}</h1>
+                        <Ratings rating={item.rating || data?.ratings} />
+                        <span className="text-sm text-gray-500">
+                          {item.createdAt ? new Date(item.createdAt).toLocaleDateString('vi-VN') : ''}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-gray-700 mb-3">{item.comment}</p>
+                    
+                    {/* Shop Feedback */}
+                    {item.shopFeedback && (
+                      <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border-l-4 border-blue-500">
+                        <div className="flex items-center mb-2">
+                          <span className="text-sm font-semibold text-blue-800">💬 Phản hồi từ shop:</span>
+                          {item.shopFeedbackDate && (
+                            <span className="ml-2 text-xs text-gray-600">
+                              {new Date(item.shopFeedbackDate).toLocaleDateString('vi-VN')}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-gray-800">{item.shopFeedback}</p>
+                      </div>
+                    )}
+                    
+                    {/* Add Feedback Button for Shop Owner */}
+                    {isShopOwner && !item.shopFeedback && (
+                      <button
+                        onClick={() => {
+                          setSelectedReview(item);
+                          setFeedbackOpen(true);
+                        }}
+                        className="mt-3 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm font-semibold rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                      >
+                        💬 Phản hồi đánh giá
+                      </button>
+                    )}
                   </div>
-                  <p>{item.comment}</p>
                 </div>
               </div>
             ))}
 
           <div className="w-full flex justify-center">
             {data && data.reviews.length === 0 && (
-              <h5>Chưa có đánh giá cho sản phẩm này!</h5>
+              <div className="text-center py-8">
+                <h5 className="text-gray-500 text-lg">Chưa có đánh giá cho sản phẩm này!</h5>
+              </div>
             )}
           </div>
         </div>
@@ -366,6 +417,86 @@ const ProductDetailsInfo = ({ data, products, totalReviewsLength, averageRating 
                   <h4 className="text-white">Xem cửa hàng</h4>
                 </div>
               </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Shop Feedback Modal */}
+      {feedbackOpen && selectedReview && (
+        <div className="w-full fixed top-0 left-0 h-screen bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-2xl bg-white rounded-xl shadow-2xl p-6">
+            <div className="w-full flex justify-between items-center mb-4 pb-4 border-b border-gray-200">
+              <h2 className="text-2xl font-bold text-gray-800">Phản hồi đánh giá</h2>
+              <RxCross1
+                size={28}
+                onClick={() => {
+                  setFeedbackOpen(false);
+                  setSelectedReview(null);
+                  setShopFeedback("");
+                }}
+                className="cursor-pointer text-gray-500 hover:text-gray-700 transition-colors"
+              />
+            </div>
+            
+            <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+              <p className="text-sm text-gray-600 mb-2">Đánh giá từ: <strong>{selectedReview.user?.name}</strong></p>
+              <p className="text-gray-700">{selectedReview.comment}</p>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-lg font-semibold text-gray-800 mb-2">
+                Phản hồi của shop <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                rows="5"
+                value={shopFeedback}
+                onChange={(e) => setShopFeedback(e.target.value)}
+                placeholder="Viết phản hồi cho đánh giá này..."
+                className="w-full border-2 border-gray-300 rounded-lg p-4 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              ></textarea>
+            </div>
+
+            <div className="flex justify-end space-x-3">
+              <button
+                className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition-colors"
+                onClick={() => {
+                  setFeedbackOpen(false);
+                  setSelectedReview(null);
+                  setShopFeedback("");
+                }}
+              >
+                Hủy
+              </button>
+              <button
+                className="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={async () => {
+                  if (shopFeedback.trim()) {
+                    try {
+                      await axios.put(
+                        `${server}/product/add-shop-feedback`,
+                        {
+                          productId: data._id,
+                          reviewId: selectedReview._id,
+                          userId: selectedReview.user?._id,
+                          shopFeedback: shopFeedback.trim(),
+                        },
+                        { withCredentials: true }
+                      );
+                      toast.success("Phản hồi đánh giá thành công!");
+                      setFeedbackOpen(false);
+                      setSelectedReview(null);
+                      setShopFeedback("");
+                      window.location.reload();
+                    } catch (error) {
+                      toast.error(error.response?.data?.message || "Có lỗi xảy ra");
+                    }
+                  }
+                }}
+                disabled={!shopFeedback.trim()}
+              >
+                Gửi phản hồi
+              </button>
             </div>
           </div>
         </div>

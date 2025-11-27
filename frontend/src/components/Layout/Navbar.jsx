@@ -16,11 +16,13 @@ const Navbar = ({ active }) => {
         <div
           className="
             rounded-full
-            bg-gradient-to-r from-[#065fb8] to-[#00AEEF]
-            backdrop-blur
-            px-2 py-1
-            shadow-lg shadow-black/20
-            border border-white/10
+            bg-gradient-to-r from-blue-500 via-blue-600 to-blue-500
+            backdrop-blur-sm
+            px-3 py-2
+            shadow-xl shadow-blue-500/30
+            border border-white/20
+            hover:shadow-2xl hover:shadow-blue-500/40
+            transition-all duration-300
           "
         >
           <ul className="flex items-center gap-1 800px:gap-2">

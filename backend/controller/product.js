@@ -318,6 +318,60 @@ router.put(
   })
 );
 
+// shop feedback for review
+router.put(
+  "/add-shop-feedback",
+  isAuthenticated,
+  isSeller,
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const { productId, reviewId, userId, shopFeedback } = req.body;
+
+      const product = await Product.findById(productId);
+
+      if (!product) {
+        return next(new ErrorHandler("Không tìm thấy sản phẩm", 404));
+      }
+
+      // Check if shop owns this product
+      if (product.shopId !== req.seller.id) {
+        return next(new ErrorHandler("Bạn không có quyền phản hồi đánh giá này", 403));
+      }
+
+      // Find review by reviewId or userId
+      let review = null;
+      if (reviewId) {
+        review = product.reviews.find(
+          (rev) => rev._id && rev._id.toString() === reviewId
+        );
+      }
+      
+      if (!review && userId) {
+        review = product.reviews.find(
+          (rev) => rev.user && rev.user._id && rev.user._id.toString() === userId
+        );
+      }
+
+      if (!review) {
+        return next(new ErrorHandler("Không tìm thấy đánh giá", 404));
+      }
+
+      review.shopFeedback = shopFeedback;
+      review.shopFeedbackDate = Date.now();
+
+      await product.save({ validateBeforeSave: false });
+
+      res.status(200).json({
+        success: true,
+        message: "Phản hồi đánh giá thành công!",
+        product,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 400));
+    }
+  })
+);
+
 // all products --- for admin
 router.get(
   "/admin-all-products",

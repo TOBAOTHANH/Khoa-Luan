@@ -491,10 +491,18 @@ const SellerInbox = ({
                     {item.images && (
                       <div className="mb-2">
                         <img
-                          src={`${item.images?.url}`}
-                          className="max-w-[300px] max-h-[300px] object-cover rounded-lg shadow-md"
+                          src={item.images?.url || item.images}
+                          className="max-w-[300px] max-h-[300px] object-cover rounded-lg shadow-md cursor-pointer hover:opacity-90 transition-opacity"
                           alt="Hình ảnh được chia sẻ"
+                          onClick={() => {
+                            const newWindow = window.open();
+                            newWindow.document.write(`<img src="${item.images?.url || item.images}" style="max-width: 100%; height: auto;" />`);
+                          }}
+                          onError={(e) => {
+                            e.target.src = item.images?.url || item.images || "https://via.placeholder.com/300";
+                          }}
                         />
+                        <p className="text-xs text-gray-500 mt-1">📷 Nhấn để xem ảnh lớn</p>
                       </div>
                     )}
                     {item.text !== "" && (

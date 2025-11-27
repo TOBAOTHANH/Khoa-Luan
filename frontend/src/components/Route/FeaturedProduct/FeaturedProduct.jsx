@@ -55,8 +55,17 @@ const FeaturedProduct = () => {
   return (
     <div>
       <div className={`${styles.section}`}>
-        <div className={`${styles.heading}`}>
-          <h1>Sản Phẩm</h1>
+        <div className="mb-8">
+          <div className="flex items-center justify-center mb-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
+              <h1 className={`${styles.heading} text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent`}>
+                ⭐ Sản Phẩm Nổi Bật
+              </h1>
+              <div className="w-12 h-1 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full"></div>
+            </div>
+          </div>
+          <p className="text-center text-gray-600 text-lg">Sản phẩm được đánh giá cao và xu hướng</p>
         </div>
         <div className="grid grid-cols-1 gap-[20px] md:grid-cols-2 md:gap-[25px] lg:grid-cols-4 lg:gap-[25px] xl:grid-cols-5 xl:gap-[30px] mb-12 border-0">
         {

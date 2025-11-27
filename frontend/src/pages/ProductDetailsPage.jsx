@@ -28,13 +28,6 @@ const ProductDetailsPage = () => {
     <div>
       <Header />
       <ProductDetails data={data} />
-        {
-          !eventData && (
-            <>
-            {data && <SuggestedProduct data={data} />}
-            </>
-          )
-        }
       <Footer />
     </div>
   );
