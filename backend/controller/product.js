@@ -372,6 +372,44 @@ router.put(
   })
 );
 
+// get all reviews for a shop
+router.get(
+  "/get-all-reviews-shop",
+  isSeller,
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const products = await Product.find({ shopId: req.seller.id });
+      
+      // Collect all reviews with product info
+      const allReviews = [];
+      products.forEach((product) => {
+        product.reviews.forEach((review) => {
+          allReviews.push({
+            ...review.toObject(),
+            productId: product._id,
+            productName: product.name,
+            productImage: product.images && product.images.length > 0 ? product.images[0] : null,
+          });
+        });
+      });
+
+      // Sort by createdAt descending (newest first)
+      allReviews.sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+        const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+        return dateB - dateA;
+      });
+
+      res.status(200).json({
+        success: true,
+        reviews: allReviews,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 400));
+    }
+  })
+);
+
 // all products --- for admin
 router.get(
   "/admin-all-products",

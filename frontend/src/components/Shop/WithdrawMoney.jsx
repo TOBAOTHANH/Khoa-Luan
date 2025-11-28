@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllOrdersOfShop } from "../../redux/actions/order";
 import styles from "../../styles/styles";
@@ -13,6 +13,8 @@ const WithdrawMoney = () => {
   const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
   const { seller } = useSelector((state) => state.seller);
+  const { orders = [] } = useSelector((state) => state.order || {});
+  const [withdraws, setWithdraws] = useState([]);
   const [paymentMethod, setPaymentMethod] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState(50);
   const [bankInfo, setBankInfo] = useState({
@@ -25,8 +27,46 @@ const WithdrawMoney = () => {
   });
 
   useEffect(() => {
-    dispatch(getAllOrdersOfShop(seller._id));
-  }, [dispatch]);
+    if (seller?._id) {
+      dispatch(getAllOrdersOfShop(seller._id));
+      // Lấy danh sách withdraw requests
+      axios
+        .get(`${server}/withdraw/get-seller-withdraw-request`, {
+          withCredentials: true,
+        })
+        .then((res) => {
+          setWithdraws(res.data.withdraws || []);
+        })
+        .catch((error) => {
+          console.log(error.response?.data?.message);
+        });
+    }
+  }, [dispatch, seller?._id]);
+
+  // Tính số dư từ tất cả đơn hàng đã giao (giống như doanh thu sau phí)
+  // KHÔNG trừ withdraw requests vì số dư là số tiền có thể rút, không phải số tiền sau khi trừ đi các yêu cầu rút tiền
+  const calculatedBalance = useMemo(() => {
+    if (!orders || orders.length === 0) {
+      return 0;
+    }
+    
+    const allDeliveredOrders = orders.filter(order => order.status === 'Delivered');
+    const totalRevenue = allDeliveredOrders.reduce((sum, order) => sum + (order.totalPrice || 0), 0);
+    const serviceCharge = totalRevenue * 0.1;
+    const netRevenue = totalRevenue - serviceCharge;
+    
+    // Số dư = doanh thu sau phí (không trừ withdraw requests)
+    // Vì withdraw requests chỉ là yêu cầu, chưa chắc đã được duyệt
+    const balance = parseFloat(netRevenue.toFixed(2));
+    
+    // Debug log
+    console.log('WithdrawMoney - Orders:', orders.length);
+    console.log('WithdrawMoney - Delivered orders:', allDeliveredOrders.length);
+    console.log('WithdrawMoney - Total revenue:', totalRevenue);
+    console.log('WithdrawMoney - Calculated balance:', balance);
+    
+    return balance;
+  }, [orders]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -83,7 +123,7 @@ const WithdrawMoney = () => {
   };
 
   const withdrawHandler = async () => {
-    if (withdrawAmount < 50 || withdrawAmount > availableBalance) {
+    if (withdrawAmount < 50 || withdrawAmount > calculatedBalance) {
       toast.error("Bạn không thể rút số tiền này!");
     } else {
       const amount = withdrawAmount;
@@ -95,11 +135,29 @@ const WithdrawMoney = () => {
         )
         .then((res) => {
           toast.success("Yêu cầu rút tiền thành công!");
+          // Reload orders và withdraws để cập nhật số dư
+          if (seller?._id) {
+            dispatch(getAllOrdersOfShop(seller._id));
+            axios
+              .get(`${server}/withdraw/get-seller-withdraw-request`, {
+                withCredentials: true,
+              })
+              .then((res) => {
+                setWithdraws(res.data.withdraws || []);
+              })
+              .catch((error) => {
+                console.log(error.response?.data?.message);
+              });
+          }
+        })
+        .catch((error) => {
+          toast.error(error.response?.data?.message || "Có lỗi xảy ra");
         });
     }
   };
 
-  const availableBalance = seller?.availableBalance.toFixed(2);
+  // Số dư được tính từ tất cả đơn hàng đã giao (giống như doanh thu sau phí)
+  const availableBalance = calculatedBalance.toFixed(2);
 
   return (
     <div className="w-full h-[90vh] p-8">
@@ -290,7 +348,7 @@ const WithdrawMoney = () => {
                       </div>
                     </div>
                     <br />
-                    <h4>Số Dư Có Sẵn: {seller?.availableBalance}$</h4>
+                    <h4>Số Dư Có Sẵn: ${availableBalance}</h4>
                     <br />
                     <div className="800px:flex w-full items-center">
                       <input

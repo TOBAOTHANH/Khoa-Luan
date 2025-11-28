@@ -100,10 +100,14 @@ router.put(
       if (!order) {
         return next(new ErrorHandler("Không tìm thấy đơn hàng với id này", 400));
       }
+      // Track if we've updated products for this order
+      let productsUpdated = false;
+      
       if (req.body.status === "Transferred to delivery partner") {
         order.cart.forEach(async (o) => {
           await updateOrder(o._id, o.qty);
         });
+        productsUpdated = true;
       }
 
       order.status = req.body.status;
@@ -113,6 +117,13 @@ router.put(
         order.paymentInfo.status = "Succeeded";
         const serviceCharge = order.totalPrice * .10;
         await updateSellerInfo(order.totalPrice - serviceCharge);
+        
+        // Update sold_out when order is delivered (in case it wasn't updated at "Transferred to delivery partner")
+        if (!productsUpdated) {
+          order.cart.forEach(async (o) => {
+            await updateOrderOnDelivered(o._id, o.qty);
+          });
+        }
       }
 
       await order.save({ validateBeforeSave: false });
@@ -124,11 +135,23 @@ router.put(
 
       async function updateOrder(id, qty) {
         const product = await Product.findById(id);
+        if (product) {
+          product.stock -= qty;
+          product.sold_out += qty;
+          await product.save({ validateBeforeSave: false });
+        }
+      }
 
-        product.stock -= qty;
-        product.sold_out += qty;
-
-        await product.save({ validateBeforeSave: false });
+      async function updateOrderOnDelivered(id, qty) {
+        const product = await Product.findById(id);
+        if (product) {
+          // Update stock and sold_out when order is delivered
+          // This handles cases where order was directly set to "Delivered" 
+          // without going through "Transferred to delivery partner"
+          product.stock = Math.max(0, product.stock - qty);
+          product.sold_out = (product.sold_out || 0) + qty;
+          await product.save({ validateBeforeSave: false });
+        }
       }
 
       async function updateSellerInfo(amount) {

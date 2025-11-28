@@ -9,7 +9,7 @@ import {
 } from "react-icons/ai";
 import { RxCross1 } from "react-icons/rx";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllProductsShop } from "../../redux/actions/product";
+import { getAllProductsShop, getAllProducts } from "../../redux/actions/product";
 import { backend_url, server } from "../../server";
 import { toast } from "react-toastify";
 import {
@@ -241,7 +241,7 @@ const ProductDetails = ({ data }) => {
               </div>
             </div>
           </div>
-          <ProductDetailsInfo data={data} products={products}  totalReviewsLength={totalReviewsLength} averageRating/>
+          <ProductDetailsInfo data={data} products={products} totalReviewsLength={totalReviewsLength} averageRating={averageRating} />
           <br />
           <br />
         </div>
@@ -256,6 +256,7 @@ const ProductDetailsInfo = ({ data, products, totalReviewsLength, averageRating 
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [selectedReview, setSelectedReview] = useState(null);
   const [shopFeedback, setShopFeedback] = useState("");
+  const dispatch = useDispatch();
   const isShopOwner = seller?._id === data?.shop?._id || user?.role === "Seller";
 
   return (
@@ -487,7 +488,16 @@ const ProductDetailsInfo = ({ data, products, totalReviewsLength, averageRating 
                       setFeedbackOpen(false);
                       setSelectedReview(null);
                       setShopFeedback("");
-                      window.location.reload();
+                      // Reload products to update the review with shop feedback
+                      dispatch(getAllProducts());
+                      // Also reload shop products
+                      if (data?.shop?._id) {
+                        dispatch(getAllProductsShop(data.shop._id));
+                      }
+                      // Small delay to ensure state is updated before reload
+                      setTimeout(() => {
+                        window.location.reload();
+                      }, 500);
                     } catch (error) {
                       toast.error(error.response?.data?.message || "Có lỗi xảy ra");
                     }

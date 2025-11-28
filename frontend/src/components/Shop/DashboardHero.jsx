@@ -58,6 +58,15 @@ const DashboardHero = () => {
     };
   }, [orders, timeFilter]);
 
+  // Tính số dư giống như doanh thu sau phí (từ tất cả đơn hàng đã giao)
+  const calculatedBalance = useMemo(() => {
+    const allDeliveredOrders = orders.filter(order => order.status === 'Delivered');
+    const totalRevenue = allDeliveredOrders.reduce((sum, order) => sum + (order.totalPrice || 0), 0);
+    const serviceCharge = totalRevenue * 0.1;
+    const netRevenue = totalRevenue - serviceCharge;
+    return netRevenue.toFixed(2);
+  }, [orders]);
+
   // Print invoice function
   const printInvoice = (orderId) => {
     const order = orders.find(o => o._id === orderId);
@@ -128,7 +137,8 @@ const DashboardHero = () => {
 
 
 
-  const availableBalance = seller?.availableBalance.toFixed(2);
+  // Số dư được tính từ tất cả đơn hàng đã giao (giống như doanh thu sau phí)
+  const availableBalance = calculatedBalance;
   const columns = [
     { field: "id", headerName: "Id sản phẩm", minWidth: 150, flex: 0.7 },
     {

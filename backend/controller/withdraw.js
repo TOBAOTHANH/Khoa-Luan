@@ -53,7 +53,6 @@ router.post(
 );
 
 // get all withdraws --- admnin
-
 router.get(
   '/get-all-withdraw-request',
   isAuthenticated,
@@ -63,6 +62,26 @@ router.get(
       const withdraws = await Withdraw.find().sort({ createdAt: -1 });
 
       res.status(201).json({
+        success: true,
+        withdraws,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
+// get withdraw requests for seller
+router.get(
+  '/get-seller-withdraw-request',
+  isSeller,
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const withdraws = await Withdraw.find({ 
+        'seller._id': req.seller._id 
+      }).sort({ createdAt: -1 });
+
+      res.status(200).json({
         success: true,
         withdraws,
       });

@@ -8,7 +8,7 @@ const fs = require("fs");
 const jwt = require("jsonwebtoken");
 const sendMail = require("../ultis/sendMail");
 const sendToken = require("../ultis/jwtToken");
-const { isAuthenticated, isAdmin } = require("../middleware/auth");
+const { isAuthenticated, isAdmin, isSeller } = require("../middleware/auth");
 
 router.post("/create-user", upload.single("file"), async (req, res, next) => {
   try {
@@ -397,9 +397,47 @@ router.get(
   })
 );
 
+// all users --- for seller
+router.get(
+  "/seller-all-users",
+  isSeller,
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const users = await User.find().sort({
+        createdAt: -1,
+      });
+      res.status(201).json({
+        success: true,
+        users,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
 
-//delete user
+
+//delete user --- for admin
 router.delete("/delete-user/:id", isAuthenticated, isAdmin("Admin"), catchAsyncErrors(async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+        return next(new ErrorHandler("Không tìm thấy người dùng với id này", 404));
+    }
+    await User.findByIdAndDelete(req.params.id);
+    res.status(201).json({
+      success: true,
+      message: "Người dùng đã được xóa thành công",
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 500));
+
+  }
+
+}));
+
+//delete user --- for seller
+router.delete("/seller-delete-user/:id", isSeller, catchAsyncErrors(async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) {

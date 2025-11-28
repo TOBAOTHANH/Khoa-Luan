@@ -3,7 +3,6 @@ import React from "react";
 import { FiShoppingBag } from "react-icons/fi";
 import { GrWorkshop } from 'react-icons/gr';
 import { RxDashboard } from "react-icons/rx";
-import { HiOutlineUserGroup } from 'react-icons/hi';
 import { CiMoneyBill, CiSettings } from "react-icons/ci";
 import { Link } from "react-router-dom";
 import { BsBag } from "react-icons/bs";
@@ -55,21 +54,6 @@ const AdminSideBar = ({ active }) => {
               }`}
           >
             All Seller
-          </h5>
-        </Link>
-      </div>
-
-      <div className="w-full flex items-center p-4">
-        <Link to="/admin-users" className="w-full flex items-center">
-          <HiOutlineUserGroup
-            size={30}
-            color={`${active === 4 ? "crimson" : "#555"}`}
-          />
-          <h5
-            className={`hidden 800px:block pl-2 text-[18px] font-[400] ${active === 4 ? "text-[crimson]" : "text-[#555]"
-              }`}
-          >
-            All User
           </h5>
         </Link>
       </div>
