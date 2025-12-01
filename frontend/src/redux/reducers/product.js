@@ -98,5 +98,18 @@ export const productReducer = createReducer(initialState, (builder) => {
             state.isLoading = false;
             state.error = action.payload;
             state.success = false;
+        })
+
+        // get all reviews for shop
+        .addCase('getAllReviewsShopRequest', (state) => {
+            state.isLoading = true;
+        })
+        .addCase('getAllReviewsShopSuccess', (state, action) => {
+            state.isLoading = false;
+            state.reviews = action.payload;
+        })
+        .addCase('getAllReviewsShopFailed', (state, action) => {
+            state.isLoading = false;
+            state.error = action.payload;
         });
 });

@@ -268,11 +268,12 @@ const EditProduct = () => {
           </div>
           <br />
           <div>
-            <input
+            <button
               type="submit"
-              value="Cập Nhật"
-              className="mt-2 cursor-pointer appearance-none text-center block w-full px-3 h-[35px] border border-gray-300 rounded-[3px] placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-blue-500 text-white font-semibold"
-            />
+              className="w-full bg-gradient-to-r from-[#f63b60] to-[#ff6b8a] hover:from-[#e02d4f] hover:to-[#ff5577] text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 ease-in-out mt-2"
+            >
+              Cập Nhật Sản Phẩm
+            </button>
           </div>
         </div>
       </form>

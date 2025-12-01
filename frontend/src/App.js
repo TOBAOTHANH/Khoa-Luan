@@ -41,6 +41,8 @@ import {
   ShopSettingsPage,
   ShopWithDrawMoneyPage,
   ShopInboxPage,
+  ShopDashboardUsers,
+  ShopDashboardReviews,
 } from './routes/ShopRoutes.js';
 import {
   AdminDashboardPage,
@@ -277,6 +279,22 @@ const App = () => {
             element={
               <SellerProtectedRoute>
                 <ShopInboxPage />
+              </SellerProtectedRoute>
+            }
+          />
+          <Route
+            path='/dashboard-users'
+            element={
+              <SellerProtectedRoute>
+                <ShopDashboardUsers />
+              </SellerProtectedRoute>
+            }
+          />
+          <Route
+            path='/dashboard-reviews'
+            element={
+              <SellerProtectedRoute>
+                <ShopDashboardReviews />
               </SellerProtectedRoute>
             }
           />

@@ -183,3 +183,29 @@ export const updateProduct = (id, newForm) => async (dispatch) => {
     });
   }
 };
+
+// get all reviews for a shop
+export const getAllReviewsShop = () => async (dispatch) => {
+  try {
+    dispatch({
+      type: "getAllReviewsShopRequest",
+    });
+
+    const { data } = await axios.get(
+      `${server}/product/get-all-reviews-shop`,
+      {
+        withCredentials: true,
+      }
+    );
+
+    dispatch({
+      type: "getAllReviewsShopSuccess",
+      payload: data.reviews,
+    });
+  } catch (error) {
+    dispatch({
+      type: "getAllReviewsShopFailed",
+      payload: error.response?.data?.message || "Failed to get reviews",
+    });
+  }
+};

@@ -41,7 +41,7 @@ const AllCoupons = () => {
 
   const handleDelete = async (id) => {
     axios.delete(`${server}/coupon/delete-coupon/${id}`, { withCredentials: true }).then((res) => {
-      toast.success("Coupon code deleted succesfully!")
+      toast.success("Đã xóa mã giảm giá thành công!")
     })
     window.location.reload();
   };
@@ -63,7 +63,7 @@ const AllCoupons = () => {
         { withCredentials: true }
       )
       .then((res) => {
-        toast.success("Coupon code created successfully!");
+        toast.success("Đã tạo mã giảm giá thành công!");
         setOpen(false);
         window.location.reload();
       })
@@ -124,12 +124,12 @@ const AllCoupons = () => {
       ) : (
         <div className="w-full mx-8 pt-1 mt-10 bg-white">
           <div className="w-full flex justify-end">
-            <div
-              className={`${styles.button} !w-max !h-[45px] px-3 !rounded-[5px] mr-3 mb-3`}
+            <button
+              className="bg-gradient-to-r from-[#f63b60] to-[#ff6b8a] hover:from-[#e02d4f] hover:to-[#ff5577] text-white font-semibold py-2.5 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 ease-in-out mr-3 mb-3"
               onClick={() => setOpen(true)}
             >
-              <span className="text-white">Tạo Mã Giảm Giá</span>
-            </div>
+              Tạo Mã Giảm Giá
+            </button>
           </div>
           <DataGrid
             rows={row}
@@ -229,11 +229,12 @@ const AllCoupons = () => {
                   </div>
                   <br />
                   <div>
-                    <input
+                    <button
                       type="submit"
-                      value="Tạo"
-                      className="mt-2 appearance-none block w-full px-3 h-[35px] border border-gray-300 rounded-[3px] placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    />
+                      className="w-full bg-gradient-to-r from-[#f63b60] to-[#ff6b8a] hover:from-[#e02d4f] hover:to-[#ff5577] text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 ease-in-out mt-2"
+                    >
+                      Tạo
+                    </button>
                   </div>
                 </form>
               </div>

@@ -16,7 +16,7 @@ router.post(
         name: req.body.name,
       });
       if (isCoupounCodeExists.length !== 0) {
-        return next(new ErrorHandler("Coupoun code already exists!", 400));
+        return next(new ErrorHandler("Mã giảm giá đã tồn tại!", 400));
       }
       const coupounCode = await CoupounCode.create(req.body);
       res.status(201).json({
@@ -52,11 +52,11 @@ router.delete(
     try {
       const couponCode = await CoupounCode.findByIdAndDelete(req.params.id);
       if (!couponCode) {
-        return next(new ErrorHandler("Coupon code dosen't exists!", 400));
+        return next(new ErrorHandler("Mã giảm giá không tồn tại!", 400));
       }
       res.status(201).json({
         success: true,
-        message: "Coupon code deleted successfully!",
+        message: "Mã giảm giá đã được xóa thành công!",
       });
     } catch (error) {
       return next(new ErrorHandler(error, 400));

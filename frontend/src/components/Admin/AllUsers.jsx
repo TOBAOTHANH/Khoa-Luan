@@ -32,11 +32,11 @@ const AllUsers = () => {
   };
 
   const columns = [
-    { field: "id", headerName: "User ID", minWidth: 150, flex: 0.7 },
+    { field: "id", headerName: "Mã người dùng", minWidth: 150, flex: 0.7 },
 
     {
       field: "name",
-      headerName: "name",
+      headerName: "Tên",
       minWidth: 130,
       flex: 0.7,
     },
@@ -49,7 +49,7 @@ const AllUsers = () => {
     },
     {
       field: "role",
-      headerName: "User Role",
+      headerName: "Vai trò",
       type: "text",
       minWidth: 130,
       flex: 0.7,
@@ -57,7 +57,7 @@ const AllUsers = () => {
 
     {
       field: "joinedAt",
-      headerName: "joinedAt",
+      headerName: "Ngày tham gia",
       type: "text",
       minWidth: 130,
       flex: 0.8,
@@ -67,7 +67,7 @@ const AllUsers = () => {
       field: " ",
       flex: 1,
       minWidth: 150,
-      headerName: "Delete User",
+      headerName: "Xóa người dùng",
       type: "number",
       sortable: false,
       renderCell: (params) => {
@@ -97,7 +97,7 @@ const AllUsers = () => {
   return (
     <div className="w-full flex justify-center pt-5">
       <div className="w-[97%]">
-        <h3 className="text-[22px] font-Poppins pb-2">All Users</h3>
+        <h3 className="text-[22px] font-Poppins pb-2">Tất cả người dùng</h3>
         <div className="w-full min-h-[45vh] bg-white rounded">
           <DataGrid
             rows={row}
@@ -114,21 +114,21 @@ const AllUsers = () => {
                 <RxCross1 size={25} onClick={() => setOpen(false)} />
               </div>
               <h3 className="text-[25px] text-center py-5 font-Poppins text-[#000000cb]">
-                Are you sure you wanna delete this user?
+                Bạn có chắc chắn muốn xóa người dùng này không?
               </h3>
               <div className="w-full flex items-center justify-center">
-                <div
-                  className={`${styles.button} text-white text-[18px] !h-[42px] mr-4`}
+                <button
+                  className="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 ease-in-out mr-4"
                   onClick={() => setOpen(false)}
                 >
-                  cancel
-                </div>
-                <div
-                  className={`${styles.button} text-white text-[18px] !h-[42px] ml-4`}
+                  Hủy
+                </button>
+                <button
+                  className="bg-gradient-to-r from-[#f63b60] to-[#ff6b8a] hover:from-[#e02d4f] hover:to-[#ff5577] text-white font-semibold py-2.5 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 ease-in-out ml-4"
                   onClick={() =>  setOpen(false) || handleDelete(userId)}
                 >
-                  confirm
-                </div>
+                  Xác nhận
+                </button>
               </div>
             </div>
           </div>

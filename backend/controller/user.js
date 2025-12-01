@@ -8,7 +8,7 @@ const fs = require("fs");
 const jwt = require("jsonwebtoken");
 const sendMail = require("../ultis/sendMail");
 const sendToken = require("../ultis/jwtToken");
-const { isAuthenticated, isAdmin } = require("../middleware/auth");
+const { isAuthenticated, isAdmin, isSeller } = require("../middleware/auth");
 
 router.post("/create-user", upload.single("file"), async (req, res, next) => {
   try {
@@ -20,7 +20,7 @@ router.post("/create-user", upload.single("file"), async (req, res, next) => {
       fs.unlink(filePath, (err) => {
         if (err) {
           console.log(err);
-          return res.status(500).json({ message: "Error deleting file" });
+          return res.status(500).json({ message: "Lỗi xóa file" });
         }
       });
       return next(new ErrorHandler("User already exists", 400));
@@ -42,17 +42,17 @@ router.post("/create-user", upload.single("file"), async (req, res, next) => {
     const activationToken = createActivationToken(user);
     const isProduction = process.env.NODE_ENV === "production";
     const activationUrl = isProduction
-      ? `https://frontend-one-kappa-74.vercel.app/activation/${activationToken}`
+      ? `https://khoa-luan-theta.vercel.app/activation/${activationToken}`
       : `http://localhost:3000/activation/${activationToken}`;
     try {
       await sendMail({
         email: user.email,
-        subject: "Activate your account",
-        message: `Hello ${user.name}, please click on the link to activate your user account: ${activationUrl}`,
+        subject: "Kích hoạt tài khoản của bạn",
+        message: `Xin chào ${user.name}, vui lòng nhấp vào liên kết để kích hoạt tài khoản người dùng của bạn: ${activationUrl}`,
       });
       res.status(201).json({
         success: true,
-        message: `please check your email:- ${user.email} to activate your account!`,
+        message: `Vui lòng kiểm tra email của bạn: ${user.email} để kích hoạt tài khoản!`,
       });
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
@@ -79,12 +79,12 @@ router.post(
         process.env.ACTIVATION_SECRET
       );
       if (!newUser) {
-        return next(new ErrorHandler("Invalid token", 400));
+        return next(new ErrorHandler("Token không hợp lệ", 400));
       }
       const { name, email, password, avatar } = newUser;
       let user = await User.findOne({ email });
       if (user) {
-        return next(new ErrorHandler("User already exists", 400));
+        return next(new ErrorHandler("Người dùng đã tồn tại", 400));
       }
       user = await User.create({
         name,
@@ -108,20 +108,20 @@ router.post(
       const { email, password } = req.body;
 
       if (!email || !password) {
-        return next(new ErrorHandler("Please provide the all fields!", 400));
+        return next(new ErrorHandler("Vui lòng điền đầy đủ tất cả các trường!", 400));
       }
 
       const user = await User.findOne({ email }).select("+password");
 
       if (!user) {
-        return next(new ErrorHandler("User doesn't exists!", 400));
+        return next(new ErrorHandler("Người dùng không tồn tại!", 400));
       }
 
       const isPasswordValid = await user.comparePassword(password);
 
       if (!isPasswordValid) {
         return next(
-          new ErrorHandler("Please provide the correct information", 400)
+          new ErrorHandler("Vui lòng cung cấp thông tin chính xác", 400)
         );
       }
 
@@ -141,7 +141,7 @@ router.get(
       const user = await User.findById(req.user.id);
 
       if (!user) {
-        return next(new ErrorHandler("User doesn't exists", 400));
+        return next(new ErrorHandler("Người dùng không tồn tại", 400));
       }
 
       res.status(200).json({
@@ -167,7 +167,7 @@ router.get(
       });
       res.status(201).json({
         success: true,
-        message: "Log out successful!",
+        message: "Đăng xuất thành công!",
       });
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
@@ -186,14 +186,14 @@ router.put(
       const user = await User.findOne({ email }).select("+password");
 
       if (!user) {
-        return next(new ErrorHandler("User not found", 400));
+        return next(new ErrorHandler("Không tìm thấy người dùng", 400));
       }
 
       const isPasswordValid = await user.comparePassword(password);
 
       if (!isPasswordValid) {
         return next(
-          new ErrorHandler("Please provide the correct information", 400)
+          new ErrorHandler("Vui lòng cung cấp thông tin chính xác", 400)
         );
       }
 
@@ -286,7 +286,7 @@ router.put(
       );
       if (sameTypeAddress) {
         return next(
-          new ErrorHandler(`${req.body.addressType} address already exists`)
+          new ErrorHandler(`Địa chỉ ${req.body.addressType} đã tồn tại`)
         );
       }
 
@@ -352,12 +352,12 @@ router.put(
       );
 
       if (!isPasswordMatched) {
-        return next(new ErrorHandler("Old password is incorrect!", 400));
+        return next(new ErrorHandler("Mật khẩu cũ không chính xác!", 400));
       }
 
       if (req.body.newPassword !== req.body.confirmPassword) {
         return next(
-          new ErrorHandler("Password doesn't matched with each other!", 400)
+          new ErrorHandler("Mật khẩu không khớp với nhau!", 400)
         );
       }
       user.password = req.body.newPassword;
@@ -366,7 +366,7 @@ router.put(
 
       res.status(200).json({
         success: true,
-        message: "Password updated successfully!",
+        message: "Mật khẩu đã được cập nhật thành công!",
       });
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
@@ -397,18 +397,56 @@ router.get(
   })
 );
 
+// all users --- for seller
+router.get(
+  "/seller-all-users",
+  isSeller,
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const users = await User.find().sort({
+        createdAt: -1,
+      });
+      res.status(201).json({
+        success: true,
+        users,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
 
-//delete user
+
+//delete user --- for admin
 router.delete("/delete-user/:id", isAuthenticated, isAdmin("Admin"), catchAsyncErrors(async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) {
-      return next(new ErrorHandler("User is not available with this id", 404));
+        return next(new ErrorHandler("Không tìm thấy người dùng với id này", 404));
     }
     await User.findByIdAndDelete(req.params.id);
     res.status(201).json({
       success: true,
-      message: "User deleted successfully",
+      message: "Người dùng đã được xóa thành công",
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 500));
+
+  }
+
+}));
+
+//delete user --- for seller
+router.delete("/seller-delete-user/:id", isSeller, catchAsyncErrors(async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+        return next(new ErrorHandler("Không tìm thấy người dùng với id này", 404));
+    }
+    await User.findByIdAndDelete(req.params.id);
+    res.status(201).json({
+      success: true,
+      message: "Người dùng đã được xóa thành công",
     });
   } catch (error) {
     return next(new ErrorHandler(error.message, 500));

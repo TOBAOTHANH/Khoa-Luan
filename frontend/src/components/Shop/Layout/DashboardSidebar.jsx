@@ -1,5 +1,5 @@
 import React from "react";
-import { AiOutlineFolderAdd, AiOutlineGift } from "react-icons/ai";
+import { AiOutlineFolderAdd, AiOutlineGift, AiOutlineMessage } from "react-icons/ai";
 import { FiPackage, FiShoppingBag } from "react-icons/fi";
 import { MdOutlineLocalOffer } from "react-icons/md";
 import { RxDashboard } from "react-icons/rx";
@@ -7,7 +7,7 @@ import { VscNewFile } from "react-icons/vsc";
 import { CiMoneyBill, CiSettings } from "react-icons/ci";
 import { Link } from "react-router-dom";
 import { BiMessageSquareDetail } from "react-icons/bi";
-import { HiOutlineReceiptRefund } from "react-icons/hi";
+import { HiOutlineReceiptRefund, HiOutlineUserGroup } from "react-icons/hi";
 
 const DashboardSideBar = ({ active }) => {
   return (
@@ -162,6 +162,36 @@ const DashboardSideBar = ({ active }) => {
               }`}
           >
             Hoàn Tiền
+          </h5>
+        </Link>
+      </div>
+
+      <div className="w-full flex items-center p-4">
+        <Link to="/dashboard-users" className="w-full flex items-center">
+          <HiOutlineUserGroup
+            size={30}
+            color={`${active === 12 ? "crimson" : "#555"}`}
+          />
+          <h5
+            className={`hidden 800px:block pl-2 text-[18px] font-[400] ${active === 12 ? "text-[crimson]" : "text-[#555]"
+              }`}
+          >
+            Tất cả Người Dùng
+          </h5>
+        </Link>
+      </div>
+
+      <div className="w-full flex items-center p-4">
+        <Link to="/dashboard-reviews" className="w-full flex items-center">
+          <AiOutlineMessage
+            size={30}
+            color={`${active === 13 ? "crimson" : "#555"}`}
+          />
+          <h5
+            className={`hidden 800px:block pl-2 text-[18px] font-[400] ${active === 13 ? "text-[crimson]" : "text-[#555]"
+              }`}
+          >
+            Phản Hồi Đánh Giá
           </h5>
         </Link>
       </div>

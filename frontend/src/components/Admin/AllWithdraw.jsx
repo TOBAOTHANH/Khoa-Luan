@@ -28,22 +28,22 @@ const AllWithdraw = () => {
   }, []);
 
   const columns = [
-    { field: "id", headerName: "Withdraw Id", minWidth: 150, flex: 0.7 },
+    { field: "id", headerName: "Mã rút tiền", minWidth: 150, flex: 0.7 },
     {
       field: "name",
-      headerName: "Shop Name",
+      headerName: "Tên cửa hàng",
       minWidth: 180,
       flex: 1.4,
     },
     {
       field: "shopId",
-      headerName: "Shop Id",
+      headerName: "Mã cửa hàng",
       minWidth: 180,
       flex: 1.4,
     },
     {
       field: "amount",
-      headerName: "Amount",
+      headerName: "Số tiền",
       minWidth: 100,
       flex: 0.6,
     },
@@ -56,14 +56,14 @@ const AllWithdraw = () => {
     },
     {
       field: "createdAt",
-      headerName: "Request given at",
+      headerName: "Ngày yêu cầu",
       type: "number",
       minWidth: 130,
       flex: 0.6,
     },
     {
       field: " ",
-      headerName: "Update Status",
+      headerName: "Cập nhật trạng thái",
       type: "number",
       minWidth: 130,
       flex: 0.6,
@@ -133,14 +133,14 @@ const AllWithdraw = () => {
               className="w-[200px] h-[35px] border rounded"
             >
               <option value={withdrawStatus}>{withdrawData.status}</option>
-              <option value={withdrawStatus}>Succeed</option>
+              <option value={withdrawStatus}>Thành công</option>
             </select>
             <button
               type="submit"
-              className={`block ${styles.button} text-white !h-[42px] mt-4 text-[18px]`}
+              className="w-full bg-gradient-to-r from-[#f63b60] to-[#ff6b8a] hover:from-[#e02d4f] hover:to-[#ff5577] text-white font-semibold py-2.5 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 ease-in-out mt-4"
               onClick={handleSubmit}
             >
-              Update
+              Cập nhật
             </button>
           </div>
         </div>

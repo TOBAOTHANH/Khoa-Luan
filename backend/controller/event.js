@@ -16,7 +16,7 @@ router.post(
       const shopId = req.body.shopId;
       const shop = await Shop.findById(shopId);
       if (!shop) {
-        return next(new ErrorHandler('Shop Id is invalid!', 400));
+        return next(new ErrorHandler('ID cửa hàng không hợp lệ!', 400));
       } else {
         const files = req.files;
         const imageUrls = files.map((file) => `${file.filename}`);
@@ -76,7 +76,7 @@ router.delete(
       if (!eventData) {
         return res.status(404).json({
           success: false,
-          message: 'Event not found with this id!',
+          message: 'Không tìm thấy sự kiện với id này!',
         });
       }
 
@@ -86,7 +86,7 @@ router.delete(
       // Phản hồi thành công ngay sau khi xóa sự kiện
       res.status(200).json({
         success: true,
-        message: 'Event Deleted successfully!',
+        message: 'Sự kiện đã được xóa thành công!',
       });
 
       // Xóa hình ảnh sau khi đã phản hồi thành công

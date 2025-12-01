@@ -6,9 +6,10 @@ import styles from "../styles/styles";
 import { getAllOrdersOfUser } from "../redux/actions/order";
 import { backend_url, server } from "../server";
 import { RxCross1 } from "react-icons/rx";
-import { AiFillStar, AiOutlineStar } from "react-icons/ai";
+import { AiFillStar, AiOutlineStar, AiOutlineMessage } from "react-icons/ai";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { getOrderStatusInVietnamese } from "../utils/orderStatus";
 
 const UserOrderDetails = () => {
   const { orders } = useSelector((state) => state.order);
@@ -64,180 +65,262 @@ const UserOrderDetails = () => {
   };
 
   return (
-    <div className={`py-4 min-h-screen ${styles.section}`}>
-      <div className="w-full flex items-center justify-between">
-        <div className="flex items-center">
-          <BsFillBagFill size={30} color="crimson" />
-          <h1 className="pl-2 text-[25px]">Order Details</h1>
+    <div className={`py-4 min-h-screen ${styles.section} bg-gradient-to-br from-gray-50 to-gray-100`}>
+      {/* Header Section */}
+      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="w-full flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-3">
+            <div className="p-3 bg-gradient-to-br from-pink-500 to-red-500 rounded-lg shadow-lg">
+              <BsFillBagFill size={30} color="white" />
+            </div>
+            <div>
+              <h1 className="text-[28px] font-bold text-gray-800">Chi tiết đơn hàng</h1>
+              <p className="text-sm text-gray-500">Theo dõi đơn hàng của bạn</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Order Info Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+            <p className="text-sm text-gray-600 mb-1">Mã đơn hàng</p>
+            <h5 className="text-lg font-bold text-gray-800">
+              #{data?._id?.slice(0, 8)}
+            </h5>
+          </div>
+          <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
+            <p className="text-sm text-gray-600 mb-1">Ngày đặt hàng</p>
+            <h5 className="text-lg font-bold text-gray-800">
+              {data?.createdAt ? new Date(data.createdAt).toLocaleDateString('vi-VN', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              }) : 'N/A'}
+            </h5>
+          </div>
         </div>
       </div>
 
-      <div className="w-full flex items-center justify-between pt-6">
-        <h5 className="text-[#00000084]">
-          Order ID: <span>#{data?._id?.slice(0, 8)}</span>
-        </h5>
-        <h5 className="text-[#00000084]">
-          Placed on: <span>{data?.createdAt?.slice(0, 10)}</span>
-        </h5>
+      {/* Order Items Section */}
+      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h3 className="text-xl font-bold text-gray-800 mb-4 pb-3 border-b border-gray-200">
+          Sản phẩm trong đơn hàng
+        </h3>
+        <div className="space-y-4">
+          {data &&
+            data?.cart.map((item, index) => {
+              return (
+                <div key={index} className="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors border border-gray-200">
+                  <div className="relative">
+                    <img
+                      src={`${backend_url}${item.images[0]}`}
+                      alt={item.name}
+                      className="w-24 h-24 object-cover rounded-lg shadow-md border-2 border-white"
+                      onError={(e) => {
+                        e.target.src = "https://via.placeholder.com/150";
+                      }}
+                    />
+                  </div>
+                  <div className="flex-1 ml-4">
+                    <h5 className="text-lg font-semibold text-gray-800 mb-1">{item.name}</h5>
+                    <div className="flex items-center space-x-4 text-gray-600">
+                      <span className="text-base">Số lượng: <strong className="text-gray-800">{item.qty}</strong></span>
+                      <span className="text-base">Giá: <strong className="text-green-600">US${item.discountPrice}</strong></span>
+                      <span className="text-base">Tổng: <strong className="text-blue-600">US${(item.discountPrice * item.qty).toFixed(2)}</strong></span>
+                    </div>
+                  </div>
+                  {!item.isReviewed && data?.status === "Delivered" && (
+                    <button
+                      className="ml-4 px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                      onClick={() => {
+                        setOpen(true);
+                        setSelectedItem(item);
+                      }}
+                    >
+                      ⭐ Viết đánh giá
+                    </button>
+                  )}
+                </div>
+              )
+            })}
+        </div>
+        
+        {/* Total Price */}
+        <div className="mt-6 pt-4 border-t-2 border-gray-300">
+          <div className="flex justify-end">
+            <div className="bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-4 rounded-lg shadow-lg">
+              <p className="text-sm mb-1">Tổng tiền</p>
+              <h5 className="text-2xl font-bold">US${data?.totalPrice?.toFixed(2)}</h5>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* order items */}
-      <br />
-      <br />
-      {data &&
-        data?.cart.map((item, index) => {
-          return (
-            <div className="w-full flex items-start mb-5">
-              <img
-                src={`${backend_url}${item.images[0]}`}
-                alt=""
-                className="w-[80x] h-[80px]"
-              />
-              <div className="w-full">
-                <h5 className="pl-3 text-[20px]">{item.name}</h5>
-                <h5 className="pl-3 text-[20px] text-[#00000091]">
-                  US${item.discountPrice} x {item.qty}
-                </h5>
-              </div>
-              {!item.isReviewed && data?.status === "Delivered" ? <div
-                className={`${styles.button} text-[#fff]`}
-                onClick={() => setOpen(true) || setSelectedItem(item)}
-              >
-                Write a review
-              </div> : (
-                null
-              )}
-            </div>
-          )
-        })}
-
-      {/* review popup */}
+      {/* Review Popup - Improved Design */}
       {open && (
-        <div className="w-full fixed top-0 left-0 h-screen bg-[#0005] z-50 flex items-center justify-center">
-          <div className="w-[50%] h-min bg-[#fff] shadow rounded-md p-3">
-            <div className="w-full flex justify-end p-3">
+        <div className="w-full fixed top-0 left-0 h-screen bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-2xl bg-white rounded-xl shadow-2xl p-6 max-h-[90vh] overflow-y-auto">
+            <div className="w-full flex justify-between items-center mb-4 pb-4 border-b border-gray-200">
+              <h2 className="text-2xl font-bold text-gray-800">Viết đánh giá sản phẩm</h2>
               <RxCross1
-                size={30}
+                size={28}
                 onClick={() => setOpen(false)}
-                className="cursor-pointer"
+                className="cursor-pointer text-gray-500 hover:text-gray-700 transition-colors"
               />
             </div>
-            <h2 className="text-[30px] font-[500] font-Poppins text-center">
-              Give a Review
-            </h2>
-            <br />
-            <div className="w-full flex">
+            
+            {/* Product Info */}
+            <div className="w-full flex items-center p-4 bg-gray-50 rounded-lg mb-6">
               <img
                 src={`${backend_url}${selectedItem?.images[0]}`}
-                alt=""
-                className="w-[80px] h-[80px]"
+                alt={selectedItem?.name}
+                className="w-20 h-20 object-cover rounded-lg shadow-md"
+                onError={(e) => {
+                  e.target.src = "https://via.placeholder.com/150";
+                }}
               />
-              <div>
-                <div className="pl-3 text-[20px]">{selectedItem?.name}</div>
-                <h4 className="pl-3 text-[20px]">
+              <div className="ml-4">
+                <div className="text-lg font-semibold text-gray-800">{selectedItem?.name}</div>
+                <h4 className="text-base text-gray-600">
                   US${selectedItem?.discountPrice} x {selectedItem?.qty}
                 </h4>
               </div>
             </div>
 
-            <br />
-            <br />
-
-            {/* ratings */}
-            <h5 className="pl-3 text-[20px] font-[500]">
-              Give a Rating <span className="text-red-500">*</span>
-            </h5>
-            <div className="flex w-full ml-2 pt-1">
-              {[1, 2, 3, 4, 5].map((i) =>
-                rating >= i ? (
-                  <AiFillStar
-                    key={i}
-                    className="mr-1 cursor-pointer"
-                    color="rgb(246,186,0)"
-                    size={25}
-                    onClick={() => setRating(i)}
-                  />
-                ) : (
-                  <AiOutlineStar
-                    key={i}
-                    className="mr-1 cursor-pointer"
-                    color="rgb(246,186,0)"
-                    size={25}
-                    onClick={() => setRating(i)}
-                  />
-                )
-              )}
+            {/* Ratings */}
+            <div className="mb-6">
+              <h5 className="text-lg font-semibold text-gray-800 mb-3">
+                Đánh giá <span className="text-red-500">*</span>
+              </h5>
+              <div className="flex items-center space-x-2">
+                {[1, 2, 3, 4, 5].map((i) =>
+                  rating >= i ? (
+                    <AiFillStar
+                      key={i}
+                      className="cursor-pointer transform hover:scale-110 transition-transform"
+                      color="rgb(246,186,0)"
+                      size={35}
+                      onClick={() => setRating(i)}
+                    />
+                  ) : (
+                    <AiOutlineStar
+                      key={i}
+                      className="cursor-pointer transform hover:scale-110 transition-transform"
+                      color="rgb(246,186,0)"
+                      size={35}
+                      onClick={() => setRating(i)}
+                    />
+                  )
+                )}
+                {rating > 0 && (
+                  <span className="ml-3 text-lg font-semibold text-gray-700">
+                    {rating}/5 sao
+                  </span>
+                )}
+              </div>
             </div>
-            <br />
-            <div className="w-full ml-3">
-              <label className="block text-[20px] font-[500]">
-                Write a comment
-                <span className="ml-1 font-[400] text-[16px] text-[#00000052]">
-                  (optional)
+
+            {/* Comment */}
+            <div className="mb-6">
+              <label className="block text-lg font-semibold text-gray-800 mb-2">
+                Viết bình luận
+                <span className="ml-2 text-sm font-normal text-gray-500">
+                  (tùy chọn)
                 </span>
               </label>
               <textarea
                 name="comment"
-                id=""
                 cols="20"
                 rows="5"
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                placeholder="How was your product? write your expresion about it!"
-                className="mt-2 w-[95%] border p-2 outline-none"
+                placeholder="Sản phẩm của bạn như thế nào? Hãy viết cảm nhận của bạn!"
+                className="w-full border-2 border-gray-300 rounded-lg p-4 outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
               ></textarea>
             </div>
-            <div
-              className={`${styles.button} text-white text-[20px] ml-3`}
-              onClick={rating > 1 ? reviewHandler : null}
-            >
-              Submit
+
+            {/* Submit Button */}
+            <div className="flex justify-end space-x-3">
+              <button
+                className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition-colors"
+                onClick={() => setOpen(false)}
+              >
+                Hủy
+              </button>
+              <button
+                className="px-8 py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={rating > 0 ? reviewHandler : null}
+                disabled={rating === 0}
+              >
+                Gửi đánh giá
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      <div className="border-t w-full text-right">
-        <h5 className="pt-3 text-[18px]">
-          Total Price: <strong>US${data?.totalPrice}</strong>
-        </h5>
-      </div>
-      <br />
-      <br />
-      <div className="w-full 800px:flex items-center">
-        <div className="w-full 800px:w-[60%]">
-          <h4 className="pt-3 text-[20px] font-[600]">Shipping Address:</h4>
-          <h4 className="pt-3 text-[20px]">
-            {data?.shippingAddress.address1 +
-              " " +
-              data?.shippingAddress.address2}
+      {/* Shipping & Payment Info */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        {/* Shipping Address */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h4 className="text-xl font-bold text-gray-800 mb-4 pb-3 border-b border-gray-200 flex items-center">
+            <span className="mr-2">📍</span> Địa chỉ giao hàng
           </h4>
-          <h4 className=" text-[20px]">{data?.shippingAddress.country}</h4>
-          <h4 className=" text-[20px]">{data?.shippingAddress.city}</h4>
-          <h4 className=" text-[20px]">{data?.user?.phoneNumber}</h4>
+          <div className="space-y-2 text-gray-700">
+            <p className="text-base">
+              <strong>Địa chỉ:</strong> {data?.shippingAddress?.address1} {data?.shippingAddress?.address2}
+            </p>
+            <p className="text-base">
+              <strong>Thành phố:</strong> {data?.shippingAddress?.city}
+            </p>
+            <p className="text-base">
+              <strong>Quốc gia:</strong> {data?.shippingAddress?.country}
+            </p>
+            <p className="text-base">
+              <strong>Điện thoại:</strong> {data?.user?.phoneNumber || 'N/A'}
+            </p>
+          </div>
         </div>
-        <div className="w-full 800px:w-[40%]">
-          <h4 className="pt-3 text-[20px]">Payment Info:</h4>
-          <h4>
-            Status:{" "}
-            {data?.paymentInfo?.status ? data?.paymentInfo?.status : "Not Paid"}
+
+        {/* Payment Info */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h4 className="text-xl font-bold text-gray-800 mb-4 pb-3 border-b border-gray-200 flex items-center">
+            <span className="mr-2">💳</span> Thông tin thanh toán
           </h4>
-          <br />
-          {
-            data?.status === "Delivered" && (
-              <div className={`${styles.button} text-white`}
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm text-gray-600 mb-1">Trạng thái thanh toán</p>
+              <span className={`inline-block px-4 py-2 rounded-lg font-semibold ${
+                data?.paymentInfo?.status === 'succeeded' 
+                  ? 'bg-green-100 text-green-800' 
+                  : 'bg-yellow-100 text-yellow-800'
+              }`}>
+                {data?.paymentInfo?.status ? getOrderStatusInVietnamese(data?.paymentInfo?.status) : "Chưa thanh toán"}
+              </span>
+            </div>
+            {data?.status === "Delivered" && (
+              <button 
+                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 ease-in-out flex items-center justify-center gap-2"
                 onClick={refundHandler}
-              >Give a Refund</div>
-            )
-          }
+              >
+                <span>🔄 Yêu cầu hoàn tiền</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
-      <br />
-      <Link to="/">
-        <div className={`${styles.button} text-white`}>Send Message</div>
-      </Link>
-      <br />
-      <br />
+
+      {/* Action Buttons */}
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="flex flex-col md:flex-row gap-4">
+          <Link to="/" className="flex-1">
+            <button className="w-full bg-gradient-to-r from-[#6443d1] to-[#7c5dd8] hover:from-[#5335b0] hover:to-[#6443d1] text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 ease-in-out flex items-center justify-center gap-2">
+              <AiOutlineMessage size={18} />
+              <span>Gửi tin nhắn cho shop</span>
+            </button>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 };

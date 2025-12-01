@@ -240,7 +240,7 @@ const DashboardMessages = () => {
       {!open && (
         <>
           <h1 className="text-center text-[30px] py-3 font-Poppins">
-            All Messages
+            Tất cả tin nhắn
           </h1>
           {/* All messages list */}
           {conversations &&
@@ -376,7 +376,7 @@ const SellerInbox = ({
           />
           <div className="pl-3">
             <h1 className="text-[18px] font-[600]">{userData?.name}</h1>
-            <h1>{activeStatus ? "Active Now" : ""}</h1>
+            <h1>{activeStatus ? "Đang hoạt động" : ""}</h1>
           </div>
         </div>
         <AiOutlineArrowRight
@@ -404,10 +404,21 @@ const SellerInbox = ({
                   />
                 )}
                 {item.images && (
-                  <img
-                    src={`${item.images?.url}`}
-                    className="w-[300px] h-[300px] object-cover rounded-[10px] mr-2"
-                  />
+                  <div className="mb-2">
+                    <img
+                      src={item.images?.url || item.images}
+                      className="w-[300px] h-[300px] object-cover rounded-[10px] mr-2 cursor-pointer hover:opacity-90 transition-opacity"
+                      alt="Hình ảnh được chia sẻ"
+                      onClick={() => {
+                        const newWindow = window.open();
+                        newWindow.document.write(`<img src="${item.images?.url || item.images}" style="max-width: 100%; height: auto;" />`);
+                      }}
+                      onError={(e) => {
+                        e.target.src = item.images?.url || item.images || "https://via.placeholder.com/300";
+                      }}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">📷 Nhấn để xem ảnh lớn</p>
+                  </div>
                 )}
                 {item.text !== "" && (
                   <div>
@@ -450,12 +461,12 @@ const SellerInbox = ({
           <input
             type="text"
             required
-            placeholder="Enter your message..."
+            placeholder="Nhập tin nhắn của bạn..."
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             className={`${styles.input}`}
           />
-          <input type="submit" value="Send" className="hidden" id="send" />
+          <input type="submit" value="Gửi" className="hidden" id="send" />
           <label htmlFor="send">
             <AiOutlineSend
               size={20}

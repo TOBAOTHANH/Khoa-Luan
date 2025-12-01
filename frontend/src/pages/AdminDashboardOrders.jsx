@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getAllOrdersOfAdmin } from "../redux/actions/order";
 import AdminSideBar from "../components/Admin/Layout/AdminSidebar";
 import { DataGrid } from "@mui/x-data-grid";
+import { getOrderStatusInVietnamese } from "../utils/orderStatus";
 
 const AdminDashboardOrders = () => {
   const dispatch = useDispatch();
@@ -17,21 +18,21 @@ const AdminDashboardOrders = () => {
   }, []);
 
   const columns = [
-    { field: "id", headerName: "Order ID", minWidth: 150, flex: 0.7 },
+    { field: "id", headerName: "Mã đơn hàng", minWidth: 150, flex: 0.7 },
 
     {
         field: "status",
-        headerName: "Status",
+        headerName: "Trạng thái",
         minWidth: 130,
         flex: 0.7,
         cellClassName: (params) => {
-            return params.row.status === "Delivered" ? "greenColor" : "redColor";
+            return params.row.status === "Đã giao hàng" ? "greenColor" : "redColor";
 
         },
     },
     {
       field: "itemsQty",
-      headerName: "Items Qty",
+      headerName: "Số lượng sản phẩm",
       type: "number",
       minWidth: 130,
       flex: 0.7,
@@ -39,14 +40,14 @@ const AdminDashboardOrders = () => {
 
     {
       field: "total",
-      headerName: "Total",
+      headerName: "Tổng tiền",
       type: "number",
       minWidth: 130,
       flex: 0.8,
     },
     {
         field: "joinedAt",
-        headerName: "Order Date",
+        headerName: "Ngày đặt hàng",
         type: "number",
         minWidth: 130,
         flex: 0.8,
@@ -60,7 +61,7 @@ const AdminDashboardOrders = () => {
         id: item._id,
         itemsQty: item?.cart?.reduce((acc, item) => acc + item.qty, 0),
         total: item?.totalPrice + " $",
-        status: item?.status,
+        status: getOrderStatusInVietnamese(item?.status),
         joinedAt: new Date(item.createdAt).toLocaleDateString('vi-VN'),
       });
     });

@@ -115,11 +115,11 @@ router.delete(
       });
       const product = await Product.findByIdAndDelete(productId);
       if (!product) {
-        return next(new ErrorHandler("Product not found with this id!", 500));
+        return next(new ErrorHandler("Không tìm thấy sản phẩm với id này!", 500));
       }
       res.status(201).json({
         success: true,
-        message: "Product Deleted successfully!",
+        message: "Sản phẩm đã được xóa thành công!",
       });
     } catch (error) {
       return next(new ErrorHandler(error, 400));
@@ -134,7 +134,7 @@ router.get(
     try {
       const product = await Product.findById(req.params.id);
       if (!product) {
-        return next(new ErrorHandler("Product not found with this id!", 404));
+        return next(new ErrorHandler("Không tìm thấy sản phẩm với id này!", 404));
       }
       res.status(200).json({
         success: true,
@@ -157,12 +157,12 @@ router.put(
       const product = await Product.findById(productId);
       
       if (!product) {
-        return next(new ErrorHandler("Product not found with this id!", 404));
+        return next(new ErrorHandler("Không tìm thấy sản phẩm với id này!", 404));
       }
 
       // Check if seller is authenticated
       if (!req.seller || !req.seller._id) {
-        return next(new ErrorHandler("Seller not authenticated!", 401));
+        return next(new ErrorHandler("Người bán chưa được xác thực!", 401));
       }
 
       // Check if seller owns this product
@@ -176,7 +176,7 @@ router.put(
       console.log("Match:", productShopId === sellerId);
       
       if (productShopId !== sellerId) {
-        return next(new ErrorHandler("You are not authorized to update this product!", 403));
+        return next(new ErrorHandler("Bạn không có quyền cập nhật sản phẩm này!", 403));
       }
 
       // Handle images
@@ -241,7 +241,7 @@ router.put(
       res.status(200).json({
         success: true,
         product,
-        message: "Product updated successfully!",
+        message: "Sản phẩm đã được cập nhật thành công!",
       });
     } catch (error) {
       return next(new ErrorHandler(error, 400));
@@ -310,10 +310,102 @@ router.put(
    
       res.status(200).json({
         success: true,
-        message: "Reviwed succesfully!",
+        message: "Đánh giá thành công!",
       });
     } catch (error) {
       return next(new ErrorHandler(error, 400));
+    }
+  })
+);
+
+// shop feedback for review
+router.put(
+  "/add-shop-feedback",
+  isAuthenticated,
+  isSeller,
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const { productId, reviewId, userId, shopFeedback } = req.body;
+
+      const product = await Product.findById(productId);
+
+      if (!product) {
+        return next(new ErrorHandler("Không tìm thấy sản phẩm", 404));
+      }
+
+      // Check if shop owns this product
+      if (product.shopId !== req.seller.id) {
+        return next(new ErrorHandler("Bạn không có quyền phản hồi đánh giá này", 403));
+      }
+
+      // Find review by reviewId or userId
+      let review = null;
+      if (reviewId) {
+        review = product.reviews.find(
+          (rev) => rev._id && rev._id.toString() === reviewId
+        );
+      }
+      
+      if (!review && userId) {
+        review = product.reviews.find(
+          (rev) => rev.user && rev.user._id && rev.user._id.toString() === userId
+        );
+      }
+
+      if (!review) {
+        return next(new ErrorHandler("Không tìm thấy đánh giá", 404));
+      }
+
+      review.shopFeedback = shopFeedback;
+      review.shopFeedbackDate = Date.now();
+
+      await product.save({ validateBeforeSave: false });
+
+      res.status(200).json({
+        success: true,
+        message: "Phản hồi đánh giá thành công!",
+        product,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 400));
+    }
+  })
+);
+
+// get all reviews for a shop
+router.get(
+  "/get-all-reviews-shop",
+  isSeller,
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const products = await Product.find({ shopId: req.seller.id });
+      
+      // Collect all reviews with product info
+      const allReviews = [];
+      products.forEach((product) => {
+        product.reviews.forEach((review) => {
+          allReviews.push({
+            ...review.toObject(),
+            productId: product._id,
+            productName: product.name,
+            productImage: product.images && product.images.length > 0 ? product.images[0] : null,
+          });
+        });
+      });
+
+      // Sort by createdAt descending (newest first)
+      allReviews.sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+        const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+        return dateB - dateA;
+      });
+
+      res.status(200).json({
+        success: true,
+        reviews: allReviews,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 400));
     }
   })
 );

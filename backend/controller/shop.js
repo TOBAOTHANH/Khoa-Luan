@@ -55,17 +55,17 @@ router.post('/create-shop', upload.single('file'), async (req, res, next) => {
     };
 
     const activationToken = createActivationToken(seller);
-    const activationUrl = `http://localhost:3000/seller/activation/${activationToken}`;
-    // const isProduction = process.env.NODE_ENV === 'production';
-    // const activationUrl = isProduction
-    //   ? `https://frontend-one-kappa-74.vercel.app/seller/activation/${activationToken}`
-    //   : `http://localhost:3000/seller/activation/${activationToken}`;
+    // const activationUrl = `http://localhost:3000/seller/activation/${activationToken}`;
+    const isProduction = process.env.NODE_ENV === 'production';
+    const activationUrl = isProduction
+      ? `https://khoa-luan-theta.vercel.app/.app/activation/${activationToken}`
+      : `http://localhost:3000/seller/activation/${activationToken}`;
 
     // Gửi email kích hoạt
     await sendMail({
       email: seller.email,
-      subject: 'Activate your account',
-      message: `Hello ${seller.name}, please click on the link to activate your account: ${activationUrl}`,
+      subject: 'Kích hoạt tài khoản của bạn',
+      message: `Xin chào ${seller.name}, vui lòng nhấp vào liên kết để kích hoạt tài khoản của bạn: ${activationUrl}`,
     });
 
     res.status(201).json({
@@ -203,20 +203,20 @@ router.post(
       const { email, password } = req.body;
 
       if (!email || !password) {
-        return next(new ErrorHandler('Please provide the all fields!', 400));
+        return next(new ErrorHandler('Vui lòng điền đầy đủ tất cả các trường!', 400));
       }
 
       const user = await Shop.findOne({ email }).select('+password');
 
       if (!user) {
-        return next(new ErrorHandler("User doesn't exists!", 400));
+        return next(new ErrorHandler("Người dùng không tồn tại!", 400));
       }
 
       const isPasswordValid = await user.comparePassword(password);
 
       if (!isPasswordValid) {
         return next(
-          new ErrorHandler('Please provide the correct information', 400)
+          new ErrorHandler('Vui lòng cung cấp thông tin chính xác', 400)
         );
       }
 
@@ -236,7 +236,7 @@ router.get(
       const seller = await Shop.findById(req.seller._id); // Sử dụng req.seller
 
       if (!seller) {
-        return next(new ErrorHandler("seller doesn't exist", 400));
+        return next(new ErrorHandler("Người bán không tồn tại", 400));
       }
 
       res.status(200).json({
@@ -261,7 +261,7 @@ router.get(
       });
       res.status(201).json({
         success: true,
-        message: 'Log out successful!',
+        message: 'Đăng xuất thành công!',
       });
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
@@ -314,13 +314,13 @@ router.delete(
       const seller = await Shop.findById(req.params.id);
       if (!seller) {
         return next(
-          new ErrorHandler('Seller is not available with this id', 404)
+          new ErrorHandler('Không tìm thấy người bán với id này', 404)
         );
       }
       await Shop.findByIdAndDelete(req.params.id);
       res.status(201).json({
         success: true,
-        message: 'User deleted successfully',
+        message: 'Người dùng đã được xóa thành công',
       });
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
@@ -374,7 +374,7 @@ router.put(
       const shop = await Shop.findOne(req.seller._id);
 
       if (!shop) {
-        return next(new ErrorHandler('User not found', 400));
+        return next(new ErrorHandler('Không tìm thấy người dùng', 400));
       }
 
       shop.name = name;
@@ -425,7 +425,7 @@ router.delete(
       const seller = await Shop.findById(req.seller._id);
 
       if (!seller) {
-        return next(new ErrorHandler('Seller not found with this id', 400));
+        return next(new ErrorHandler('Không tìm thấy người bán với id này', 400));
       }
 
       seller.withdrawMethod = null;

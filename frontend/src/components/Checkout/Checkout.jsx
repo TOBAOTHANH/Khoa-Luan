@@ -1,26 +1,37 @@
 import React, { useState } from "react";
 import styles from "../../styles/styles";
-import { Country, State } from "country-state-city";
+import { State } from "country-state-city";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useEffect } from "react";
 import axios from "axios";
 import { server } from "../../server";
 import { toast } from "react-toastify";
+import { vietnamDistricts } from "../../utils/vietnamDistricts";
+import { HiLocationMarker, HiMail, HiPhone, HiUser } from "react-icons/hi";
+import { FaMapMarkerAlt, FaTruck } from "react-icons/fa";
 
 const Checkout = () => {
   const { user } = useSelector((state) => state.user);
   const { cart } = useSelector((state) => state.cart);
-  const [country, setCountry] = useState("");
+  const [country, setCountry] = useState("VN"); // Mặc định là Việt Nam
   const [city, setCity] = useState("");
+  const [district, setDistrict] = useState("");
   const [userInfo, setUserInfo] = useState(false);
   const [address1, setAddress1] = useState("");
-  const [address2, setAddress2] = useState("");
   const [zipCode, setZipCode] = useState(null);
+  const [phoneNumber, setPhoneNumber] = useState(user?.phoneNumber || "");
   const [couponCode, setCouponCode] = useState("");
   const [couponCodeData, setCouponCodeData] = useState(null);
   const [discountPrice, setDiscountPrice] = useState(null);
   const navigate = useNavigate();
+
+  // Cập nhật phoneNumber khi user thay đổi
+  useEffect(() => {
+    if (user?.phoneNumber) {
+      setPhoneNumber(user.phoneNumber);
+    }
+  }, [user]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -29,19 +40,26 @@ const Checkout = () => {
   const paymentSubmit = () => {
     if (
       address1 === "" ||
-      address2 === "" ||
       zipCode === null ||
       country === "" ||
-      city === ""
+      city === "" ||
+      district === ""
     ) {
-      toast.error("Please choose your delivery address!");
+      toast.error("Vui lòng điền đầy đủ thông tin địa chỉ giao hàng!");
     } else {
       const shippingAddress = {
         address1,
-        address2,
         zipCode,
         country,
         city,
+        district,
+        phoneNumber,
+      };
+
+      // Tạo user object với phoneNumber đã cập nhật
+      const userWithUpdatedPhone = {
+        ...user,
+        phoneNumber: phoneNumber,
       };
 
       const orderData = {
@@ -51,7 +69,7 @@ const Checkout = () => {
         shipping,
         discountPrice,
         shippingAddress,
-        user,
+        user: userWithUpdatedPhone,
       };
 
       // update local storage with the updated orders array
@@ -80,14 +98,14 @@ const Checkout = () => {
           cart && cart.filter((item) => item.shopId === shopId);
 
         if (isCouponValid.length === 0) {
-          toast.error("Coupon code is not valid for this shop");
+          toast.error("Mã giảm giá không hợp lệ cho cửa hàng này");
           setCouponCode("");
         } else {
           const eligiblePrice = isCouponValid.reduce(
             (acc, item) => acc + item.qty * item.discountPrice,
             0
           );
-          toast.success("Coupon code applied successfully!");
+          toast.success("Áp dụng mã giảm giá thành công!");
           const discountPrice = (eligiblePrice * couponCodeValue) / 100;
           setDiscountPrice(discountPrice);
           setCouponCodeData(res.data.couponCode);
@@ -95,7 +113,7 @@ const Checkout = () => {
         }
       }
       if (res.data.couponCode === null) {
-        toast.error("Coupon code doesn't exists!");
+        toast.error("Mã giảm giá không tồn tại!");
         setCouponCode("");
       }
     });
@@ -110,42 +128,59 @@ const Checkout = () => {
   console.log(discountPercentenge);
 
   return (
-    <div className="w-full flex flex-col items-center py-8">
-      <div className="w-[90%] 1000px:w-[70%] block 800px:flex">
-        <div className="w-full 800px:w-[65%]">
+    <div className="w-full min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8 px-4">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8 text-center">
+          <h1 className="text-4xl font-bold text-gray-800 mb-2 flex items-center justify-center gap-3">
+            <FaTruck className="text-blue-600" />
+            Thông Tin Giao Hàng
+          </h1>
+          <p className="text-gray-600 text-lg">Vui lòng điền đầy đủ thông tin để chúng tôi có thể giao hàng đến bạn</p>
+        </div>
+
+        <div className="w-full block lg:flex gap-8">
+          <div className="w-full lg:w-[65%]">
           <ShippingInfo
             user={user}
             country={country}
-            setCountry={setCountry}
             city={city}
             setCity={setCity}
+            district={district}
+            setDistrict={setDistrict}
             userInfo={userInfo}
             setUserInfo={setUserInfo}
             address1={address1}
             setAddress1={setAddress1}
-            address2={address2}
-            setAddress2={setAddress2}
             zipCode={zipCode}
             setZipCode={setZipCode}
+            phoneNumber={phoneNumber}
+            setPhoneNumber={setPhoneNumber}
           />
+          </div>
+          <div className="w-full lg:w-[35%] lg:mt-0 mt-8">
+            <CartData
+              handleSubmit={handleSubmit}
+              totalPrice={totalPrice}
+              shipping={shipping}
+              subTotalPrice={subTotalPrice}
+              couponCode={couponCode}
+              setCouponCode={setCouponCode}
+              discountPercentenge={discountPercentenge}
+            />
+          </div>
         </div>
-        <div className="w-full 800px:w-[35%] 800px:mt-0 mt-8">
-          <CartData
-            handleSubmit={handleSubmit}
-            totalPrice={totalPrice}
-            shipping={shipping}
-            subTotalPrice={subTotalPrice}
-            couponCode={couponCode}
-            setCouponCode={setCouponCode}
-            discountPercentenge={discountPercentenge}
-          />
+        <div className="flex justify-center mt-8">
+          <button
+            className="w-full max-w-md bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 ease-in-out flex items-center justify-center gap-2 text-lg"
+            onClick={paymentSubmit}
+          >
+            <span>Tiếp tục đến thanh toán</span>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
         </div>
-      </div>
-      <div
-        className={`${styles.button} w-[150px] 800px:w-[280px] mt-10`}
-        onClick={paymentSubmit}
-      >
-        <h5 className="text-white">Go to Payment</h5>
       </div>
     </div>
   );
@@ -154,158 +189,208 @@ const Checkout = () => {
 const ShippingInfo = ({
   user,
   country,
-  setCountry,
   city,
   setCity,
+  district,
+  setDistrict,
   userInfo,
   setUserInfo,
   address1,
   setAddress1,
-  address2,
-  setAddress2,
   zipCode,
   setZipCode,
+  phoneNumber,
+  setPhoneNumber,
 }) => {
+  // Reset district when city changes
+  useEffect(() => {
+    setDistrict("");
+  }, [city, setDistrict]);
+  
   return (
-    <div className="w-full 800px:w-[95%] bg-white rounded-md p-5 pb-8">
-      <h5 className="text-[18px] font-[500]">Shipping Address</h5>
-      <br />
-      <form>
-        <div className="w-full flex pb-3">
-          <div className="w-[50%]">
-            <label className="block pb-2">Full Name</label>
+    <div className="w-full bg-white rounded-2xl shadow-xl p-6 md:p-8">
+      {/* Header */}
+      <div className="mb-6 pb-6 border-b border-gray-200">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg p-3">
+            <FaMapMarkerAlt className="text-white text-2xl" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-800">Địa chỉ giao hàng</h2>
+        </div>
+        <p className="text-gray-600 ml-14">Vui lòng điền đầy đủ thông tin bên dưới</p>
+      </div>
+
+      <form className="space-y-6">
+        {/* Personal Info */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+              <HiUser className="text-blue-600" />
+              Họ và Tên
+            </label>
             <input
               type="text"
               value={user && user.name}
               required
-              className={`${styles.input} !w-[95%]`}
+              readOnly
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
           </div>
-          <div className="w-[50%]">
-            <label className="block pb-2">Email Address</label>
+          <div>
+            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+              <HiMail className="text-blue-600" />
+              Địa chỉ Email
+            </label>
             <input
               type="email"
               value={user && user.email}
               required
-              className={`${styles.input}`}
+              readOnly
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
           </div>
         </div>
 
-        <div className="w-full flex pb-3">
-          <div className="w-[50%]">
-            <label className="block pb-2">Phone Number</label>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+              <HiPhone className="text-blue-600" />
+              Số điện thoại
+            </label>
             <input
-              type="number"
+              type="tel"
               required
-              value={user && user.phoneNumber}
-              className={`${styles.input} !w-[95%]`}
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              placeholder="Nhập số điện thoại"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
           </div>
-          <div className="w-[50%]">
-            <label className="block pb-2">Zip Code</label>
+          <div>
+            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+              <HiLocationMarker className="text-blue-600" />
+              Mã bưu điện
+            </label>
             <input
               type="number"
               value={zipCode}
               onChange={(e) => setZipCode(e.target.value)}
               required
-              className={`${styles.input}`}
+              placeholder="Nhập mã bưu điện"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
           </div>
         </div>
 
-        <div className="w-full flex pb-3">
-          <div className="w-[50%]">
-            <label className="block pb-2">Country</label>
+        {/* Location */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+              <FaMapMarkerAlt className="text-blue-600" />
+              Tỉnh/Thành phố
+            </label>
             <select
-              className="w-[95%] border h-[40px] rounded-[5px]"
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
-            >
-              <option className="block pb-2" value="">
-                Choose your country
-              </option>
-              {Country &&
-                Country.getAllCountries().map((item) => (
-                  <option key={item.isoCode} value={item.isoCode}>
-                    {item.name}
-                  </option>
-                ))}
-            </select>
-          </div>
-          <div className="w-[50%]">
-            <label className="block pb-2">City</label>
-            <select
-              className="w-[95%] border h-[40px] rounded-[5px]"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
               value={city}
               onChange={(e) => setCity(e.target.value)}
             >
-              <option className="block pb-2" value="">
-                Choose your City
-              </option>
+              <option value="">Chọn tỉnh/thành phố</option>
               {State &&
                 State.getStatesOfCountry(country).map((item) => (
-                  <option key={item.isoCode} value={item.isoCode}>
+                  <option key={item.isoCode} value={item.name}>
                     {item.name}
+                  </option>
+                ))}
+            </select>
+          </div>
+          <div>
+            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+              <FaMapMarkerAlt className="text-blue-600" />
+              Quận/Huyện
+            </label>
+            <select
+              className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                !city ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'
+              }`}
+              value={district}
+              onChange={(e) => setDistrict(e.target.value)}
+              disabled={!city}
+            >
+              <option value="">
+                {city ? "Chọn quận/huyện" : "Chọn tỉnh/thành phố trước"}
+              </option>
+              {city && vietnamDistricts[city] &&
+                vietnamDistricts[city].map((item, index) => (
+                  <option key={index} value={item}>
+                    {item}
                   </option>
                 ))}
             </select>
           </div>
         </div>
 
-        <div className="w-full flex pb-3">
-          <div className="w-[50%]">
-            <label className="block pb-2">Address1</label>
-            <input
-              type="address"
-              required
-              value={address1}
-              onChange={(e) => setAddress1(e.target.value)}
-              className={`${styles.input} !w-[95%]`}
-            />
-          </div>
-          <div className="w-[50%]">
-            <label className="block pb-2">Address2</label>
-            <input
-              type="address"
-              value={address2}
-              onChange={(e) => setAddress2(e.target.value)}
-              required
-              className={`${styles.input}`}
-            />
-          </div>
-        </div>
-
-        <div></div>
-      </form>
-      <h5
-        className="text-[18px] cursor-pointer inline-block text-[#f63b60] mt-3"
-        onClick={() => setUserInfo(!userInfo)}
-      >
-        Choose From saved address
-      </h5>
-      {userInfo && (
+        {/* Address Detail */}
         <div>
-          {user &&
-            user.addresses.map((item, index) => (
-              <div className="w-full flex mt-1">
-                <input
-                  type="checkbox"
-                  className="mr-3"
-                  value={item.addressType}
-                  onClick={() =>
-                    setAddress1(item.address1) ||
-                    setAddress2(item.address2) ||
-                    setZipCode(item.zipCode) ||
-                    setCountry(item.country) ||
-                    setCity(item.city)
+          <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+            <HiLocationMarker className="text-blue-600" />
+            Địa chỉ chi tiết
+          </label>
+          <input
+            type="address"
+            required
+            value={address1}
+            onChange={(e) => setAddress1(e.target.value)}
+            placeholder="Số nhà, tên đường, phường/xã..."
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+          />
+        </div>
+      </form>
+
+      {/* Saved Addresses */}
+      <div className="mt-6 pt-6 border-t border-gray-200">
+        <button
+          type="button"
+          className="text-blue-600 hover:text-blue-700 font-semibold flex items-center gap-2 transition-colors"
+          onClick={() => setUserInfo(!userInfo)}
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+          {userInfo ? "Ẩn địa chỉ đã lưu" : "Chọn từ địa chỉ đã lưu"}
+        </button>
+        {userInfo && user && user.addresses && user.addresses.length > 0 && (
+          <div className="mt-4 space-y-3">
+            {user.addresses.map((item, index) => (
+              <div
+                key={index}
+                className="flex items-center p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all cursor-pointer"
+                onClick={() => {
+                  setAddress1(item.address1 || "");
+                  setZipCode(item.zipCode || "");
+                  setCity(item.city || "");
+                  setDistrict(item.district || "");
+                  if (item.phoneNumber) {
+                    setPhoneNumber(item.phoneNumber);
                   }
+                  setUserInfo(false);
+                }}
+              >
+                <input
+                  type="radio"
+                  name="savedAddress"
+                  className="mr-3"
+                  checked={address1 === item.address1}
+                  onChange={() => {}}
                 />
-                <h2>{item.addressType}</h2>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-800">{item.addressType}</h3>
+                  <p className="text-sm text-gray-600">{item.address1}</p>
+                </div>
               </div>
             ))}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -320,40 +405,59 @@ const CartData = ({
   discountPercentenge,
 }) => {
   return (
-    <div className="w-full bg-[#fff] rounded-md p-5 pb-8">
-      <div className="flex justify-between">
-        <h3 className="text-[16px] font-[400] text-[#000000a4]">subtotal:</h3>
-        <h5 className="text-[18px] font-[600]">${subTotalPrice}</h5>
+    <div className="w-full bg-white rounded-2xl shadow-xl p-6 md:p-8 sticky top-8">
+      <h2 className="text-2xl font-bold text-gray-800 mb-6 pb-4 border-b border-gray-200">
+        Tóm tắt đơn hàng
+      </h2>
+      
+      <div className="space-y-4 mb-6">
+        <div className="flex justify-between items-center py-2">
+          <span className="text-gray-600 font-medium">Tạm tính:</span>
+          <span className="text-gray-800 font-semibold text-lg">${subTotalPrice}</span>
+        </div>
+        
+        <div className="flex justify-between items-center py-2">
+          <span className="text-gray-600 font-medium">Phí vận chuyển:</span>
+          <span className="text-gray-800 font-semibold text-lg">${shipping.toFixed(2)}</span>
+        </div>
+        
+        <div className="flex justify-between items-center py-2 border-b border-gray-200 pb-4">
+          <span className="text-gray-600 font-medium">Giảm giá:</span>
+          <span className="text-green-600 font-semibold text-lg">
+            {discountPercentenge ? `-$${discountPercentenge}` : "-"}
+          </span>
+        </div>
       </div>
-      <br />
-      <div className="flex justify-between">
-        <h3 className="text-[16px] font-[400] text-[#000000a4]">shipping:</h3>
-        <h5 className="text-[18px] font-[600]">${shipping.toFixed(2)}</h5>
+
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-6 border border-blue-200">
+        <div className="flex justify-between items-center">
+          <span className="text-gray-800 font-bold text-xl">Tổng cộng:</span>
+          <span className="text-blue-600 font-bold text-2xl">${totalPrice}</span>
+        </div>
       </div>
-      <br />
-      <div className="flex justify-between border-b pb-3">
-        <h3 className="text-[16px] font-[400] text-[#000000a4]">Discount:</h3>
-        <h5 className="text-[18px] font-[600]">
-          - {discountPercentenge ? "$" + discountPercentenge.toString() : null}
-        </h5>
-      </div>
-      <h5 className="text-[18px] font-[600] text-end pt-3">${totalPrice}</h5>
-      <br />
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          className={`${styles.input} h-[40px] pl-2`}
-          placeholder="Coupoun code"
-          value={couponCode}
-          onChange={(e) => setCouponCode(e.target.value)}
-          required
-        />
-        <input
-          className={`w-full h-[40px] border border-[#f63b60] text-center text-[#f63b60] rounded-[3px] mt-8 cursor-pointer`}
-          required
-          value="Apply code"
-          type="submit"
-        />
+
+      {/* Coupon Code */}
+      <form onSubmit={handleSubmit} className="mt-6 pt-6 border-t border-gray-200">
+        <div className="mb-4">
+          <label className="text-sm font-semibold text-gray-700 mb-2">
+            Mã giảm giá
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              placeholder="Nhập mã giảm giá"
+              value={couponCode}
+              onChange={(e) => setCouponCode(e.target.value)}
+            />
+            <button
+              type="submit"
+              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+            >
+              Áp dụng
+            </button>
+          </div>
+        </div>
       </form>
     </div>
   );

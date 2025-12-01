@@ -61,7 +61,7 @@ const Footer = () => {
         </ul>
 
         <ul className="text-center sm:text-start">
-          <h1 className="mb-1 font-semibold">Company</h1>
+          <h1 className="mb-1 font-semibold">Công ty</h1>
           {footerProductLinks.map((link, index) => (
             <li key={index}>
               <Link
@@ -76,7 +76,7 @@ const Footer = () => {
         </ul>
 
         <ul className="text-center sm:text-start">
-          <h1 className="mb-1 font-semibold">Shop</h1>
+          <h1 className="mb-1 font-semibold">Cửa hàng</h1>
           {footercompanyLinks.map((link, index) => (
             <li key={index}>
               <Link
@@ -91,7 +91,7 @@ const Footer = () => {
         </ul>
 
         <ul className="text-center sm:text-start">
-          <h1 className="mb-1 font-semibold">Support</h1>
+          <h1 className="mb-1 font-semibold">Hỗ trợ</h1>
           {footerSupportLinks.map((link, index) => (
             <li key={index}>
               <Link
@@ -110,8 +110,8 @@ const Footer = () => {
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10
          text-center pt-2 text-gray-400 text-sm pb-8"
       >
-        <span>© 2020 Becodemy. All rights reserved.</span>
-        <span>Terms · Privacy Policy</span>
+        <span>© 2020 Becodemy. Bảo lưu mọi quyền.</span>
+        <span>Điều khoản · Chính sách bảo mật</span>
         <div className="sm:block flex items-center justify-center w-full">
           <img
             src="https://hamart-shop.vercel.app/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffooter-payment.a37c49ac.png&w=640&q=75"

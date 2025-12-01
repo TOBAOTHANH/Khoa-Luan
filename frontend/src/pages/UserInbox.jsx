@@ -243,7 +243,7 @@ const UserInbox = () => {
         <div className="w-[350px] ml-20 border-r border-gray-200 bg-white flex flex-col flex-shrink-0">
           <div className="px-4 py-4 border-b border-gray-200">
             <h1 className="text-xl font-Poppins font-semibold text-gray-800">
-              All Messages
+              Tất cả tin nhắn
             </h1>
           </div>
           <div className="flex-1 overflow-y-auto">
@@ -380,7 +380,7 @@ const MessageList = ({
           {!loading && data?.lastMessageId !== userData?._id
             ? <span className="text-blue-600 font-medium">You: </span>
             : <span className="text-gray-500">{userData?.name?.split(" ")[0] || "Shop"}: </span>}
-          {data?.lastMessage || "No messages yet"}
+          {data?.lastMessage || "Chưa có tin nhắn"}
         </p>
       </div>
     </div>
@@ -491,10 +491,18 @@ const SellerInbox = ({
                     {item.images && (
                       <div className="mb-2">
                         <img
-                          src={`${item.images?.url}`}
-                          className="max-w-[300px] max-h-[300px] object-cover rounded-lg shadow-md"
-                          alt="Shared image"
+                          src={item.images?.url || item.images}
+                          className="max-w-[300px] max-h-[300px] object-cover rounded-lg shadow-md cursor-pointer hover:opacity-90 transition-opacity"
+                          alt="Hình ảnh được chia sẻ"
+                          onClick={() => {
+                            const newWindow = window.open();
+                            newWindow.document.write(`<img src="${item.images?.url || item.images}" style="max-width: 100%; height: auto;" />`);
+                          }}
+                          onError={(e) => {
+                            e.target.src = item.images?.url || item.images || "https://via.placeholder.com/300";
+                          }}
                         />
+                        <p className="text-xs text-gray-500 mt-1">📷 Nhấn để xem ảnh lớn</p>
                       </div>
                     )}
                     {item.text !== "" && (
@@ -554,7 +562,7 @@ const SellerInbox = ({
               <input
                 type="text"
                 required
-                placeholder="Type your message..."
+                placeholder="Nhập tin nhắn của bạn..."
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"

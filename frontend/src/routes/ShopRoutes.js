@@ -11,6 +11,8 @@ import ShopOrderDetails from "../pages/Shop/ShopOrderDetails";
 import ShopSettingsPage from "../pages/Shop/ShopSettingsPage";
 import ShopWithDrawMoneyPage from "../pages/Shop/ShopWithDrawMoneyPage";
 import ShopInboxPage from "../pages/Shop/ShopInboxPage";
+import ShopDashboardUsers from "../pages/Shop/ShopDashboardUsers";
+import ShopDashboardReviews from "../pages/Shop/ShopDashboardReviews";
 export 
 {
   ShopDashboardPage,
@@ -26,6 +28,8 @@ export
   ShopSettingsPage,
   ShopWithDrawMoneyPage,
   ShopInboxPage,
+  ShopDashboardUsers,
+  ShopDashboardReviews,
 }
 
 

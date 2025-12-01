@@ -58,9 +58,12 @@ const productSchema = new mongoose.Schema({
       productId: {
         type: String,
       },
-      createdAt:{
+      shopFeedback: {
+        type: String,
+        default: "",
+      },
+      shopFeedbackDate: {
         type: Date,
-        default: Date.now(),
       },
       createdAt: {
         type: Date,
