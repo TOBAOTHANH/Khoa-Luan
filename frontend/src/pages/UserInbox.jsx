@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { AiOutlineArrowRight, AiOutlineSend } from "react-icons/ai";
 import { TfiGallery } from "react-icons/tfi";
 import styles from "../styles/styles";
+import ImageModal from "../components/Common/ImageModal";
 const ENDPOINT = "http://localhost:4000/";
 const socketId = socketIO(ENDPOINT, { transports: ["websocket"] });
 
@@ -24,6 +25,8 @@ const UserInbox = () => {
   const [images, setImages] = useState();
   const [activeStatus, setActiveStatus] = useState(false);
   const [open, setOpen] = useState(false);
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -287,6 +290,10 @@ const UserInbox = () => {
               activeStatus={activeStatus}
               scrollRef={scrollRef}
               handleImageUpload={handleImageUpload}
+              setSelectedImage={setSelectedImage}
+              setImageModalOpen={setImageModalOpen}
+              imageModalOpen={imageModalOpen}
+              selectedImage={selectedImage}
             />
           ) : (
             <div className="flex-1 flex items-center justify-center">
@@ -398,6 +405,10 @@ const SellerInbox = ({
   activeStatus,
   scrollRef,
   handleImageUpload,
+  setSelectedImage,
+  setImageModalOpen,
+  imageModalOpen,
+  selectedImage,
 }) => {
   return (
     <div className="w-full h-full flex flex-col bg-gray-50">
@@ -492,11 +503,11 @@ const SellerInbox = ({
                       <div className="mb-2">
                         <img
                           src={item.images?.url || item.images}
-                          className="max-w-[300px] max-h-[300px] object-cover rounded-lg shadow-md cursor-pointer hover:opacity-90 transition-opacity"
+                          className="max-w-[250px] max-h-[250px] object-contain rounded-lg shadow-md cursor-pointer hover:opacity-90 transition-opacity border border-gray-200"
                           alt="Hình ảnh được chia sẻ"
                           onClick={() => {
-                            const newWindow = window.open();
-                            newWindow.document.write(`<img src="${item.images?.url || item.images}" style="max-width: 100%; height: auto;" />`);
+                            setSelectedImage(item.images?.url || item.images);
+                            setImageModalOpen(true);
                           }}
                           onError={(e) => {
                             e.target.src = item.images?.url || item.images || "https://via.placeholder.com/300";
@@ -577,6 +588,13 @@ const SellerInbox = ({
           </form>
         </div>
       </div>
+
+      {/* Image Modal */}
+      <ImageModal
+        isOpen={imageModalOpen}
+        onClose={() => setImageModalOpen(false)}
+        imageUrl={selectedImage}
+      />
     </div>
   );
 };

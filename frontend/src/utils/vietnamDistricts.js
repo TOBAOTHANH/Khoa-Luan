@@ -13,7 +13,7 @@ export const vietnamDistricts = {
     "Huyện Tri Tôn",
     "Thị xã Tân Châu",
   ],
-  "Bà Rịa - Vũng Tàu": [
+  "Bà Rịa-Vũng Tàu": [
     "Thành phố Vũng Tàu",
     "Thành phố Bà Rịa",
     "Huyện Châu Đức",
@@ -747,7 +747,7 @@ export const vietnamDistricts = {
     "Huyện Tân Phước",
     "Huyện Tân Phú Đông",
   ],
-  "TP Hồ Chí Minh": [
+  "Hồ Chí Minh": [
     "Quận 1",
     "Quận 2",
     "Quận 3",

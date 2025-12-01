@@ -9,11 +9,14 @@ import styles from "../../styles/styles";
 import Loader from "../Layout/Loader";
 import { server } from "../../server";
 import { toast } from "react-toastify";
+import { getAllProductsShop } from "../../redux/actions/product";
 
 const AllCoupons = () => {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loadingProducts, setLoadingProducts] = useState(false);
   const [coupouns, setCoupouns] = useState([]);
   const [minAmount, setMinAmout] = useState(null);
   const [maxAmount, setMaxAmount] = useState(null);
@@ -26,6 +29,7 @@ const AllCoupons = () => {
 
   useEffect(() => {
     setIsLoading(true);
+    // Load coupons
     axios
       .get(`${server}/coupon/get-coupon/${seller._id}`, {
         withCredentials: true,
@@ -37,7 +41,17 @@ const AllCoupons = () => {
       .catch((error) => {
         setIsLoading(false);
       });
-  }, [dispatch]);
+  }, [dispatch, seller?._id]);
+
+  // Load products only when opening the form
+  useEffect(() => {
+    if (open && seller?._id && (!products || products.length === 0)) {
+      setLoadingProducts(true);
+      dispatch(getAllProductsShop(seller._id)).finally(() => {
+        setLoadingProducts(false);
+      });
+    }
+  }, [open, seller?._id, dispatch]);
 
   const handleDelete = async (id) => {
     axios.delete(`${server}/coupon/delete-coupon/${id}`, { withCredentials: true }).then((res) => {
@@ -48,28 +62,42 @@ const AllCoupons = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
-    await axios
-      .post(
+    try {
+      const res = await axios.post(
         `${server}/coupon/create-coupon-code`,
         {
           name,
           minAmount,
           maxAmount,
-          selectedProducts,
+          selectedProduct: selectedProducts || null, // Backend expects selectedProduct (singular)
           value,
           shopId: seller._id,
         },
         { withCredentials: true }
-      )
-      .then((res) => {
-        toast.success("Đã tạo mã giảm giá thành công!");
-        setOpen(false);
-        window.location.reload();
-      })
-      .catch((error) => {
-        toast.error(error.response.data.message);
+      );
+      
+      toast.success(res.data.message || "Đã tạo mã giảm giá thành công!");
+      
+      // Reset form
+      setName("");
+      setValue(null);
+      setMinAmout(null);
+      setMaxAmount(null);
+      setSelectedProducts(null);
+      setOpen(false);
+      
+      // Reload coupons list
+      const couponsRes = await axios.get(`${server}/coupon/get-coupon/${seller._id}`, {
+        withCredentials: true,
       });
+      setCoupouns(couponsRes.data.couponCodes);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Có lỗi xảy ra khi tạo mã giảm giá!");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const columns = [
@@ -210,30 +238,50 @@ const AllCoupons = () => {
                   </div>
                   <br />
                   <div>
-                    <label className="pb-2">Sản Phẩm Được Chọn</label>
-                    <select
-                      className="w-full mt-2 border h-[35px] rounded-[5px]"
-                      value={selectedProducts}
-                      onChange={(e) => setSelectedProducts(e.target.value)}
-                    >
-                      <option value="Choose your selected products">
-                        Chọn sản phẩm được chọn
-                      </option>
-                      {products &&
-                        products.map((i) => (
-                          <option value={i.name} key={i.name}>
-                            {i.name}
+                    <label className="pb-2">Sản Phẩm Được Chọn (Tùy chọn)</label>
+                    {loadingProducts ? (
+                      <div className="text-center py-2 text-gray-500 text-sm">
+                        Đang tải danh sách sản phẩm...
+                      </div>
+                    ) : (
+                      <select
+                        className="w-full mt-2 border h-[35px] rounded-[5px]"
+                        value={selectedProducts || ""}
+                        onChange={(e) => setSelectedProducts(e.target.value || null)}
+                        disabled={loadingProducts}
+                      >
+                        <option value="">
+                          Không chọn (Áp dụng cho tất cả sản phẩm)
+                        </option>
+                        {products && products.length > 0 ? (
+                          products.map((i) => (
+                            <option value={i.name} key={i._id || i.name}>
+                              {i.name} - ${i.discountPrice}
+                            </option>
+                          ))
+                        ) : (
+                          <option value="" disabled>
+                            Chưa có sản phẩm nào
                           </option>
-                        ))}
-                    </select>
+                        )}
+                      </select>
+                    )}
+                    {!loadingProducts && products && products.length === 0 && (
+                      <p className="text-sm text-gray-500 mt-1">
+                        Vui lòng tạo sản phẩm trước khi chọn sản phẩm cho mã giảm giá
+                      </p>
+                    )}
                   </div>
                   <br />
                   <div>
                     <button
                       type="submit"
-                      className="w-full bg-gradient-to-r from-[#f63b60] to-[#ff6b8a] hover:from-[#e02d4f] hover:to-[#ff5577] text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 ease-in-out mt-2"
+                      disabled={isSubmitting}
+                      className={`w-full bg-gradient-to-r from-[#f63b60] to-[#ff6b8a] hover:from-[#e02d4f] hover:to-[#ff5577] text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 ease-in-out mt-2 ${
+                        isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
                     >
-                      Tạo
+                      {isSubmitting ? 'Đang tạo...' : 'Tạo'}
                     </button>
                   </div>
                 </form>

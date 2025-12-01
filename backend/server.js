@@ -1,6 +1,5 @@
 const app = require("./app");
 const connectDatabase = require("./db/Database");
- // Cho phép tất cả các nguồn
 
 //handling uncaught exceptions
 process.on("uncaughtException", (err) => {
@@ -19,11 +18,12 @@ if (process.env.NODE_ENV !== "production") {
 connectDatabase();
 
 // server
-const server = app.listen(process.env.PORT, () => {
+const server = app.listen(process.env.PORT || 8000, () => {
   console.log(
-    `Server is running on http://localhost:${process.env.PORT}`
+    `Server is running on http://localhost:${process.env.PORT || 8000}`
   );
 });
+
 // unhandled promise rejections
 process.on("unhandledRejection", (err) => {
   console.log(`Shutdown the server for ${err.message}`);
@@ -32,3 +32,13 @@ process.on("unhandledRejection", (err) => {
     process.exit(1);
   });
 });
+
+// Export backend_url for use in other files
+const isProduction = process.env.NODE_ENV === "production";
+const backend_url = isProduction
+  ? process.env.BACKEND_URL || "https://khoa-luan-ipa8.onrender.com/"
+  : process.env.BACKEND_URL || "http://localhost:8000/";
+
+module.exports = {
+  backend_url,
+};
