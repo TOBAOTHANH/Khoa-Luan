@@ -34,7 +34,8 @@
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
     "timeago.js": "^4.0.2",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "xlsx": "^0.18.5"
   },
   "scripts": {
     "start": "set PORT=3000 && react-scripts start",
