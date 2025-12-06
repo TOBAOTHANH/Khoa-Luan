@@ -12,22 +12,41 @@ router.post(
   catchAsyncErrors(async (req, res, next) => {
     try {
       const messageData = req.body;
+      let imageUrls = [];
+
+      // Nếu có files từ FormData (upload trực tiếp)
       if (req.files && req.files.length > 0) {
         const files = req.files;
-        const imageUrls = files.map((file) => `${file.filename}`);
-        messageData.images = imageUrls;
+        imageUrls = files.map((file) => `${file.filename}`);
+      }
+      // Nếu có images từ body (base64 string hoặc array)
+      else if (req.body.images) {
+        // Nếu images là string (base64 hoặc filename), chuyển thành array
+        if (typeof req.body.images === 'string') {
+          imageUrls = [req.body.images];
+        }
+        // Nếu images là array
+        else if (Array.isArray(req.body.images)) {
+          imageUrls = req.body.images;
+        }
       }
 
       messageData.conversationId = req.body.conversationId;
       messageData.sender = req.body.sender;
-      messageData.text = req.body.text;
+      messageData.text = req.body.text || "";
 
+      // Lưu images - nếu là array thì lấy phần tử đầu, nếu là string thì dùng trực tiếp
+      let imagesValue = undefined;
+      if (imageUrls.length > 0) {
+        // Nếu là array, lấy phần tử đầu (vì model chỉ lưu String)
+        imagesValue = Array.isArray(imageUrls) ? imageUrls[0] : imageUrls;
+      }
 
       const message = new Messages({
         conversationId: messageData.conversationId,
         text: messageData.text,
         sender: messageData.sender,
-        images: messageData.images ? messageData.images : undefined,
+        images: imagesValue,
       });
 
       await message.save();
@@ -38,6 +57,27 @@ router.post(
     } catch (error) {
       console.error("Error creating message:", error);
       return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
+// upload message image
+router.post(
+  "/upload-image",
+  upload.single("image"),
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      if (!req.file) {
+        return next(new ErrorHandler("Không có ảnh nào được upload", 400));
+      }
+      
+      const imageUrl = req.file.filename;
+      res.status(200).json({
+        success: true,
+        imageUrl: imageUrl,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 400));
     }
   })
 );

@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { getAllProductsShop } from "../../redux/actions/product";
 import { deleteProduct } from "../../redux/actions/product";
 import Loader from "../Layout/Loader";
+import { backend_url } from "../../server";
 
 const AllProducts = () => {
   const { products, isLoading } = useSelector((state) => state.products);
@@ -42,7 +43,29 @@ const AllProducts = () => {
   }, [products]);
 
   const columns = [
-    { field: "id", headerName: "Id Sản Phẩm", minWidth: 150, flex: 0.7 },
+    {
+      field: "image",
+      headerName: "Hình ảnh",
+      minWidth: 100,
+      flex: 0.8,
+      sortable: false,
+      renderCell: (params) => {
+        const product = products.find(p => p._id === params.row.id);
+        const imageUrl = product?.images?.[0] 
+          ? `${backend_url}${product.images[0]}`
+          : "https://via.placeholder.com/80";
+        return (
+          <img
+            src={imageUrl}
+            alt={params.row.name}
+            className="w-16 h-16 object-cover rounded-lg"
+            onError={(e) => {
+              e.target.src = "https://via.placeholder.com/80";
+            }}
+          />
+        );
+      },
+    },
     {
       field: "name",
       headerName: "Tên Sản Phẩm",
@@ -52,23 +75,36 @@ const AllProducts = () => {
     {
       field: "price",
       headerName: "Giá Sản Phẩm",
-      minWidth: 100,
-      flex: 0.6,
+      minWidth: 120,
+      flex: 0.7,
+      renderCell: (params) => (
+        <span className="font-bold text-green-600">{params.value}</span>
+      ),
     },
     {
       field: "Stock",
       headerName: "Tồn Kho",
       type: "number",
-      minWidth: 80,
-      flex: 0.5,
+      minWidth: 100,
+      flex: 0.6,
+      renderCell: (params) => {
+        const stock = params.value;
+        let color = "text-gray-600";
+        if (stock === 0) color = "text-red-600 font-bold";
+        else if (stock <= 10) color = "text-orange-600 font-semibold";
+        else color = "text-green-600";
+        return <span className={color}>{stock}</span>;
+      },
     },
-
     {
       field: "sold",
       headerName: "Đã Bán",
       type: "number",
-      minWidth: 130,
+      minWidth: 100,
       flex: 0.6,
+      renderCell: (params) => (
+        <span className="text-blue-600 font-semibold">{params.value}</span>
+      ),
     },
     {
       field: "Preview",
@@ -79,13 +115,11 @@ const AllProducts = () => {
       sortable: false,
       renderCell: (params) => {
         return (
-          <>
-            <Link to={`/product/${params.id}`}>
-              <Button>
-                <AiOutlineEye size={20} />
-              </Button>
-            </Link>
-          </>
+          <Link to={`/product/${params.id}`}>
+            <Button className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
+              <AiOutlineEye size={20} />
+            </Button>
+          </Link>
         );
       },
     },
@@ -98,13 +132,11 @@ const AllProducts = () => {
       sortable: false,
       renderCell: (params) => {
         return (
-          <>
-            <Link to={`/dashboard-edit-product/${params.id}`}>
-              <Button>
-                <AiOutlineEdit size={20} />
-              </Button>
-            </Link>
-          </>
+          <Link to={`/dashboard-edit-product/${params.id}`}>
+            <Button className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50">
+              <AiOutlineEdit size={20} />
+            </Button>
+          </Link>
         );
       },
     },
@@ -117,11 +149,12 @@ const AllProducts = () => {
       sortable: false,
       renderCell: (params) => {
         return (
-          <>
-            <Button onClick={() => handleDelete(params.id)}>
-              <AiOutlineDelete size={20} />
-            </Button>
-          </>
+          <Button 
+            onClick={() => handleDelete(params.id)}
+            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+          >
+            <AiOutlineDelete size={20} />
+          </Button>
         );
       },
     },
@@ -156,24 +189,38 @@ const AllProducts = () => {
       {isLoading ? (
         <Loader />
       ) : (
-        <div className="w-full mx-8 pt-1 mt-10 bg-white rounded-lg shadow-lg p-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Quản lý sản phẩm</h2>
+        <div className="w-full mx-8 pt-1 mt-10 bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-xl p-6 border border-gray-100">
+          <div className="mb-6">
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+              Quản lý sản phẩm
+            </h2>
+            <p className="text-gray-600">Tổng số sản phẩm: {products?.length || 0}</p>
+          </div>
           
           {/* Tabs */}
-          <div className="flex flex-wrap gap-2 mb-6 border-b border-gray-200 pb-4">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
-                  activeTab === tab.id
-                    ? `bg-${tab.color}-500 text-white shadow-lg transform scale-105`
-                    : `bg-gray-100 text-gray-700 hover:bg-gray-200`
-                }`}
-              >
-                {tab.label} ({tab.count})
-              </button>
-            ))}
+          <div className="flex flex-wrap gap-3 mb-6 border-b border-gray-200 pb-4">
+            {tabs.map((tab) => {
+              const colorClasses = {
+                blue: 'bg-blue-500 hover:bg-blue-600',
+                green: 'bg-green-500 hover:bg-green-600',
+                yellow: 'bg-yellow-500 hover:bg-yellow-600',
+                red: 'bg-red-500 hover:bg-red-600',
+                purple: 'bg-purple-500 hover:bg-purple-600',
+              };
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
+                    activeTab === tab.id
+                      ? `${colorClasses[tab.color]} text-white shadow-lg transform scale-105`
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {tab.label} ({tab.count})
+                </button>
+              );
+            })}
           </div>
 
           {/* Product Table */}
@@ -192,10 +239,15 @@ const AllProducts = () => {
               sx={{
                 '& .MuiDataGrid-cell': {
                   borderBottom: '1px solid #e5e7eb',
+                  padding: '8px',
                 },
                 '& .MuiDataGrid-columnHeaders': {
-                  backgroundColor: '#f9fafb',
+                  backgroundColor: '#f3f4f6',
                   fontWeight: 'bold',
+                  fontSize: '14px',
+                },
+                '& .MuiDataGrid-row:hover': {
+                  backgroundColor: '#f9fafb',
                 },
               }}
             />

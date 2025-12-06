@@ -28,17 +28,53 @@ const Header = ({ activeHeading }) => {
   const { allProducts } = useSelector((state) => state.products);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchData, setSearchData] = useState(null);
+  const [searchHistory, setSearchHistory] = useState([]);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [active, setActive] = useState(false);
   const [dropDown, setDropDown] = useState(false);
   const [openWishlist, setOpenWishlist] = useState(false);
   const [open, setOpen] = useState(false);
+
+  // Load search history from localStorage
+  useEffect(() => {
+    const savedHistory = localStorage.getItem('searchHistory');
+    if (savedHistory) {
+      try {
+        const history = JSON.parse(savedHistory);
+        setSearchHistory(history);
+      } catch (error) {
+        console.error('Error loading search history:', error);
+      }
+    }
+  }, []);
+
+  // Get products from history IDs
+  const getHistoryProducts = () => {
+    if (!searchHistory || searchHistory.length === 0 || !allProducts) return [];
+    
+    const historyProducts = searchHistory
+      .map(productId => allProducts.find(p => p._id === productId))
+      .filter(p => p !== undefined); // Remove undefined products
+    
+    return historyProducts;
+  };
 
   const handleSearchChange = (e) => {
     const term = e.target.value;
     setSearchTerm(term);
 
     if (!term) {
-      setSearchData(null);
+      // Nếu không có từ khóa và đang focus, hiển thị lịch sử tìm kiếm
+      if (isSearchFocused) {
+        const historyProducts = getHistoryProducts();
+        if (historyProducts.length > 0) {
+          setSearchData(historyProducts);
+        } else {
+          setSearchData(null);
+        }
+      } else {
+        setSearchData(null);
+      }
       return;
     }
 
@@ -69,6 +105,46 @@ const Header = ({ activeHeading }) => {
     } else {
       setSearchData(null);
     }
+  };
+
+  const handleSearchFocus = () => {
+    setIsSearchFocused(true);
+    // Khi focus và không có từ khóa, hiển thị lịch sử tìm kiếm
+    if (!searchTerm) {
+      const historyProducts = getHistoryProducts();
+      if (historyProducts.length > 0) {
+        setSearchData(historyProducts);
+      }
+    }
+  };
+
+  const handleSearchBlur = () => {
+    // Delay để cho phép click vào link
+    setTimeout(() => {
+      setIsSearchFocused(false);
+      if (!searchTerm) {
+        setSearchData(null);
+      }
+    }, 200);
+  };
+
+  // Save product to search history
+  const addToSearchHistory = (productId) => {
+    if (!productId) return;
+    
+    let updatedHistory = [...searchHistory];
+    
+    // Remove if already exists
+    updatedHistory = updatedHistory.filter(id => id !== productId);
+    
+    // Add to beginning
+    updatedHistory.unshift(productId);
+    
+    // Limit to 20 most recent
+    updatedHistory = updatedHistory.slice(0, 20);
+    
+    setSearchHistory(updatedHistory);
+    localStorage.setItem('searchHistory', JSON.stringify(updatedHistory));
   };
 
   useEffect(() => {
@@ -116,13 +192,15 @@ const Header = ({ activeHeading }) => {
               placeholder="Tìm kiếm sản phẩm..."
               value={searchTerm}
               onChange={handleSearchChange}
+              onFocus={handleSearchFocus}
+              onBlur={handleSearchBlur}
               className="h-[45px] w-full px-4 pr-12 border-2 border-blue-300 focus:border-blue-500 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all relative z-50"
             />
             <AiOutlineSearch
               size={24}
               className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-blue-500 hover:text-blue-600 transition-colors z-50"
             />
-           {searchTerm && searchData && searchData.length !== 0 ? (
+           {((isSearchFocused && searchData && searchData.length > 0) || (searchTerm && searchData && searchData.length > 0)) ? (
               <div 
                 className="absolute min-h-[200px] max-h-[60vh] overflow-y-auto bg-white rounded-lg shadow-2xl border border-gray-200 z-[9999] p-4 mt-2 w-full"
                 onMouseEnter={(e) => {
@@ -138,16 +216,25 @@ const Header = ({ activeHeading }) => {
                   scrollbarColor: '#cbd5e0 #f7fafc'
                 }}
               >
+                {!searchTerm && searchData && searchData.length > 0 && (
+                  <div className="mb-3 pb-3 border-b border-gray-200">
+                    <p className="text-sm font-semibold text-gray-700">Tìm kiếm gần đây</p>
+                    <p className="text-xs text-gray-500">Các sản phẩm bạn đã xem</p>
+                  </div>
+                )}
                 <div className="space-y-1">
                   {searchData &&
-                    searchData.slice(0, 50).map((i, index) => {
+                    searchData.slice(0, searchTerm ? 50 : 20).map((i, index) => {
                       return (
                         <Link 
                           key={i._id || index} 
                           to={`/product/${i._id}`}
                           onClick={() => {
+                            // Lưu vào lịch sử tìm kiếm
+                            addToSearchHistory(i._id);
                             setSearchTerm("");
                             setSearchData(null);
+                            setIsSearchFocused(false);
                             document.body.style.overflow = 'auto';
                           }}
                         >

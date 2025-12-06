@@ -160,7 +160,8 @@ router.put(
       const oldStatus = order.status;
       order.status = req.body.status;
 
-      if (req.body.status === "Delivered") {
+      // Chỉ cộng số dư khi order chuyển từ status khác sang "Delivered" lần đầu tiên
+      if (req.body.status === "Delivered" && oldStatus !== "Delivered") {
         order.deliveredAt = Date.now();
         order.paymentInfo.status = "Succeeded";
         const serviceCharge = order.totalPrice * .10;
@@ -287,7 +288,8 @@ router.put(
       async function updateSellerInfo(amount) {
         const seller = await Shop.findById(req.seller.id);
         
-        seller.availableBalance = amount;
+        // Cộng dồn số dư thay vì ghi đè
+        seller.availableBalance = (seller.availableBalance || 0) + amount;
 
         await seller.save();
       }

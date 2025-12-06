@@ -239,12 +239,17 @@ const DashboardMessages = () => {
   }, [messages]);
 
   return (
-    <div className="w-[90%] bg-white m-5 h-[85vh] overflow-y-scroll rounded">
+    <div className="w-[90%] bg-gradient-to-br from-white to-gray-50 m-5 h-[85vh] overflow-y-scroll rounded-xl shadow-lg border border-gray-100">
       {!open && (
         <>
-          <h1 className="text-center text-[30px] py-3 font-Poppins">
-            Tất cả tin nhắn
-          </h1>
+          <div className="sticky top-0 bg-gradient-to-r from-cyan-500 to-blue-600 p-4 rounded-t-xl shadow-md z-10">
+            <h1 className="text-center text-2xl font-bold text-white">
+              Tất cả tin nhắn
+            </h1>
+            <p className="text-center text-cyan-100 text-sm mt-1">
+              {conversations?.length || 0} cuộc trò chuyện
+            </p>
+          </div>
           {/* All messages list */}
           {conversations &&
             conversations.map((item, index) => (
@@ -324,8 +329,11 @@ const MessageList = ({
 
   return (
     <div
-      className={`w-full flex p-3 px-3 ${active === index ? "bg-[#00000010]" : "bg-transparent"
-        }  cursor-pointer`}
+      className={`w-full flex p-4 mx-2 my-2 rounded-xl transition-all duration-200 ${
+        active === index 
+          ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg transform scale-[1.02]" 
+          : "bg-white hover:bg-gray-50 border border-gray-200 shadow-sm hover:shadow-md"
+      } cursor-pointer`}
       onClick={(e) =>
         setActive(index) ||
         handleClick(data._id) ||
@@ -338,21 +346,23 @@ const MessageList = ({
         <img
           src={`${backend_url}${user?.avatar?.url}`}
           alt=""
-          className="w-[50px] h-[50px] rounded-full"
+          className="w-[50px] h-[50px] rounded-full border-2 border-white shadow-md"
         />
         {online ? (
-          <div className="w-[12px] h-[12px] bg-green-400 rounded-full absolute top-[2px] right-[2px]" />
+          <div className="w-[14px] h-[14px] bg-green-400 rounded-full absolute top-0 right-0 border-2 border-white" />
         ) : (
-          <div className="w-[12px] h-[12px] bg-[#c7b9b9] rounded-full absolute top-[2px] right-[2px]" />
+          <div className="w-[14px] h-[14px] bg-gray-400 rounded-full absolute top-0 right-0 border-2 border-white" />
         )}
       </div>
-      <div className="pl-3">
-        <h1 className="text-[18px]">{user?.name}</h1>
-        <p className="text-[16px] text-[#000c]">
+      <div className="pl-3 flex-1">
+        <h1 className={`text-lg font-semibold ${active === index ? "text-white" : "text-gray-800"}`}>
+          {user?.name}
+        </h1>
+        <p className={`text-sm ${active === index ? "text-cyan-100" : "text-gray-600"} truncate`}>
           {!isLoading && data?.lastMessageId !== user?._id
-            ? "You:"
+            ? "Bạn:"
             : user?.name?.split?.(" ")[0] + ": "}{" "}
-          {data?.lastMessage}
+          {data?.lastMessage || "Chưa có tin nhắn"}
         </p>
       </div>
     </div>
@@ -378,27 +388,38 @@ const SellerInbox = ({
   return (
     <div className="w-full min-h-full flex flex-col justify-between">
       {/* message header */}
-      <div className="w-full flex p-3 items-center justify-between bg-slate-200">
-        <div className="flex">
-          <img
-            src={`${backend_url}${userData?.avatar?.url}`}
-            alt=""
-            className="w-[60px] h-[60px] rounded-full"
-          />
+      <div className="w-full flex p-4 items-center justify-between bg-gradient-to-r from-cyan-500 to-blue-600 shadow-md">
+        <div className="flex items-center">
+          <div className="relative">
+            <img
+              src={`${backend_url}${userData?.avatar?.url}`}
+              alt=""
+              className="w-[60px] h-[60px] rounded-full border-2 border-white shadow-lg"
+            />
+            {activeStatus && (
+              <div className="w-[16px] h-[16px] bg-green-400 rounded-full absolute bottom-0 right-0 border-2 border-white"></div>
+            )}
+          </div>
           <div className="pl-3">
-            <h1 className="text-[18px] font-[600]">{userData?.name}</h1>
-            <h1>{activeStatus ? "Đang hoạt động" : ""}</h1>
+            <h1 className="text-lg font-bold text-white">{userData?.name}</h1>
+            <p className="text-cyan-100 text-sm">
+              {activeStatus ? "🟢 Đang hoạt động" : "⚫ Không hoạt động"}
+            </p>
           </div>
         </div>
-        <AiOutlineArrowRight
-          size={20}
-          className="cursor-pointer"
+        <button
           onClick={() => setOpen(false)}
-        />
+          className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+        >
+          <AiOutlineArrowRight
+            size={24}
+            className="cursor-pointer text-white"
+          />
+        </button>
       </div>
 
       {/* messages */}
-      <div className="px-3 h-[65vh] py-3 overflow-y-scroll">
+      <div className="px-4 h-[65vh] py-4 overflow-y-scroll bg-gradient-to-b from-gray-50 to-white">
         {messages &&
           messages.map((item, index) => {
             return (
@@ -410,7 +431,7 @@ const SellerInbox = ({
                 {item.sender !== sellerId && (
                   <img
                     src={`${backend_url}${userData?.avatar?.url}`}
-                    className="w-[40px] h-[40px] rounded-full mr-3"
+                    className="w-[40px] h-[40px] rounded-full mr-3 border-2 border-white shadow-md"
                     alt=""
                   />
                 )}
@@ -418,7 +439,7 @@ const SellerInbox = ({
                   <div className="mb-2">
                     <img
                       src={item.images?.url || item.images}
-                      className="max-w-[250px] max-h-[250px] object-contain rounded-[10px] mr-2 cursor-pointer hover:opacity-90 transition-opacity border border-gray-200"
+                      className="max-w-[250px] max-h-[250px] object-contain rounded-xl mr-2 cursor-pointer hover:opacity-90 transition-opacity border-2 border-gray-200 shadow-md"
                       alt="Hình ảnh được chia sẻ"
                       onClick={() => {
                         setSelectedImage(item.images?.url || item.images);
@@ -434,13 +455,15 @@ const SellerInbox = ({
                 {item.text !== "" && (
                   <div>
                     <div
-                      className={`w-max p-2 rounded ${item.sender === sellerId ? "bg-[#000]" : "bg-[#38c776]"
-                        } text-[#fff] h-min`}
+                      className={`w-max max-w-[70%] p-3 rounded-2xl shadow-md ${
+                        item.sender === sellerId 
+                          ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white" 
+                          : "bg-gradient-to-r from-green-500 to-emerald-600 text-white"
+                      }`}
                     >
-                      <p>{item.text}</p>
+                      <p className="break-words">{item.text}</p>
                     </div>
-
-                    <p className="text-[12px] text-[#000000d3] pt-1">
+                    <p className={`text-xs pt-1 px-1 ${item.sender === sellerId ? "text-gray-500" : "text-gray-600"}`}>
                       {format(item.createdAt)}
                     </p>
                   </div>
@@ -453,7 +476,7 @@ const SellerInbox = ({
       {/* send message input */}
       <form
         aria-required={true}
-        className="p-3 relative w-full flex justify-between items-center"
+        className="p-4 relative w-full flex justify-between items-center bg-white border-t border-gray-200"
         onSubmit={sendMessageHandler}
       >
         <div className="w-[30px]">

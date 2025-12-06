@@ -16,31 +16,48 @@ router.post(
     try {
       const { amount } = req.body;
 
+      // Validate amount
+      if (!amount || amount < 50) {
+        return next(new ErrorHandler("Số tiền rút tối thiểu là $50", 400));
+      }
+
+      // Get shop with current balance
+      const shop = await Shop.findById(req.seller._id);
+      
+      if (!shop) {
+        return next(new ErrorHandler("Không tìm thấy shop", 404));
+      }
+
+      const currentBalance = shop.availableBalance || 0;
+      
+      // Check if balance is sufficient
+      if (currentBalance < amount) {
+        return next(new ErrorHandler("Số dư không đủ để rút tiền", 400));
+      }
+
       const data = {
         seller: req.seller,
         amount,
       };
 
+      // Create withdraw request first
+      const withdraw = await Withdraw.create(data);
+
+      // Update shop balance
+      shop.availableBalance = currentBalance - amount;
+      await shop.save();
+
+      // Send email notification
       try {
         await sendMail({
           email: req.seller.email,
           subject: 'Yêu cầu rút tiền',
           message: `Xin chào ${req.seller.name}, Yêu cầu rút tiền của bạn với số tiền ${amount}$ đang được xử lý. Sẽ mất từ 3 đến 7 ngày để xử lý! `,
         });
-        res.status(201).json({
-          success: true,
-        });
       } catch (error) {
-        return next(new ErrorHandler(error.message, 500));
+        console.error("Error sending email:", error);
+        // Don't fail the request if email fails
       }
-
-      const withdraw = await Withdraw.create(data);
-
-      const shop = await Shop.findById(req.seller._id);
-
-      shop.availableBalance = shop.availableBalance - amount;
-
-      await shop.save();
 
       res.status(201).json({
         success: true,
