@@ -9,10 +9,11 @@ const ShopAllCoupouns = () => {
     <DashboardHeader />
 
     <div className="flex justify-between w-full">
-    <div className="w-[80px] 800px:w-[330px]">
-      <DashboardSideBar active={9} />
+    <div className="w-[80px] 800px:w-[330px] flex-shrink-0">
+      {/* Sidebar is fixed, this div is just for spacing */}
     </div>
-        <div className="w-full justify-center flex">
+    <DashboardSideBar active={9} />
+        <div className="w-full justify-center flex ml-0">
            <AllCoupouns />
         </div>
   </div>

@@ -8,10 +8,11 @@ const ShopCreateProduct = () => {
         <DashboardHeader />
 
         <div className="flex items-start justify-between w-full">
-        <div className="w-[80px] 800px:w-[330px]">
-          <DashboardSideBar active={4} />
+        <div className="w-[80px] 800px:w-[330px] flex-shrink-0">
+          {/* Sidebar is fixed, this div is just for spacing */}
         </div>
-            <div className="w-full justify-center flex">
+        <DashboardSideBar active={3} />
+            <div className="w-full justify-center flex ml-0">
                 <CreateProduct />
             </div>
       </div>

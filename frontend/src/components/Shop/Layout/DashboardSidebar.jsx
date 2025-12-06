@@ -1,9 +1,8 @@
 import React, { useRef, useEffect } from "react";
-import { AiOutlineFolderAdd, AiOutlineGift, AiOutlineMessage, AiOutlineFileExcel } from "react-icons/ai";
+import { AiOutlineGift, AiOutlineMessage, AiOutlineFileExcel } from "react-icons/ai";
 import { FiPackage, FiShoppingBag } from "react-icons/fi";
 import { MdOutlineLocalOffer } from "react-icons/md";
 import { RxDashboard } from "react-icons/rx";
-import { VscNewFile } from "react-icons/vsc";
 import { CiMoneyBill, CiSettings } from "react-icons/ci";
 import { Link, useLocation } from "react-router-dom";
 import { BiMessageSquareDetail } from "react-icons/bi";
@@ -53,28 +52,12 @@ const DashboardSideBar = ({ active }) => {
       description: "Quản lý sản phẩm",
     },
     {
-      id: 4,
-      path: "/dashboard-create-product",
-      icon: AiOutlineFolderAdd,
-      label: "Tạo Sản Phẩm Mới",
-      color: "from-indigo-500 to-indigo-600",
-      description: "Thêm sản phẩm mới",
-    },
-    {
       id: 5,
       path: "/dashboard-events",
       icon: MdOutlineLocalOffer,
       label: "Tất cả Sự Kiện",
       color: "from-pink-500 to-pink-600",
       description: "Quản lý sự kiện",
-    },
-    {
-      id: 6,
-      path: "/dashboard-create-event",
-      icon: VscNewFile,
-      label: "Tạo Sự Kiện Mới",
-      color: "from-rose-500 to-rose-600",
-      description: "Tạo sự kiện khuyến mãi",
     },
     {
       id: 7,
@@ -139,13 +122,10 @@ const DashboardSideBar = ({ active }) => {
   return (
     <div 
       ref={sidebarRef}
-      className="w-full h-[calc(100vh-80px)] bg-gradient-to-b from-white to-gray-50 shadow-lg border-r border-gray-200 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
+      className="w-[80px] 800px:w-[330px] h-[calc(100vh-80px)] bg-gradient-to-b from-white to-gray-50 shadow-lg border-r border-gray-200 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent fixed top-[80px] left-0 z-20"
       style={{ 
-        position: 'sticky',
-        top: '80px',
         scrollBehavior: 'auto', 
-        overscrollBehavior: 'contain',
-        alignSelf: 'flex-start'
+        overscrollBehavior: 'contain'
       }}
     >
       {/* Compact Header - Removed for cleaner look */}

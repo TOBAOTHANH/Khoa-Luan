@@ -8,9 +8,10 @@ const ShopDashboardPage = () => {
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
           <DashboardHeader />
           <div className="flex items-start justify-between w-full relative">
-            <div className="w-[80px] 800px:w-[330px] self-start">
-              <DashboardSideBar active={1} />
+            <div className="w-[80px] 800px:w-[330px] flex-shrink-0">
+              {/* Sidebar is fixed, this div is just for spacing */}
             </div>
+            <DashboardSideBar active={1} />
             <DashboardHero />
           </div>
         </div>

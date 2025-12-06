@@ -71,10 +71,8 @@ const AllEvents = () => {
       type: "number",
       sortable: false,
       renderCell: (params) => {
-        const d = params.row.name;
-        const product_name = d.replace(/\s+/g, "-");
         return (
-          <Link to={`/events}`}>
+          <Link to="/events">
             <Button className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
               <AiOutlineEye size={20} />
             </Button>
@@ -124,18 +122,26 @@ const AllEvents = () => {
           <div className="max-w-7xl mx-auto">
             {/* Header Section */}
             <div className="bg-gradient-to-r from-pink-500 to-rose-600 rounded-2xl shadow-xl p-6 mb-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-white bg-opacity-20 rounded-xl">
-                  <AiOutlineGift className="text-white text-3xl" />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white bg-opacity-20 rounded-xl">
+                    <AiOutlineGift className="text-white text-3xl" />
+                  </div>
+                  <div>
+                    <h1 className="text-3xl font-bold text-white mb-1">
+                      Quản Lý Sự Kiện
+                    </h1>
+                    <p className="text-pink-100 text-sm">
+                      Tổng số sự kiện: {events?.length || 0}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h1 className="text-3xl font-bold text-white mb-1">
-                    Quản Lý Sự Kiện
-                  </h1>
-                  <p className="text-pink-100 text-sm">
-                    Tổng số sự kiện: {events?.length || 0}
-                  </p>
-                </div>
+                <Link to="/dashboard-create-event">
+                  <button className="flex items-center gap-2 bg-white text-pink-600 hover:bg-pink-50 font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                    <AiOutlineGift size={20} />
+                    Tạo Sự Kiện Mới
+                  </button>
+                </Link>
               </div>
             </div>
 
