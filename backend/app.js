@@ -17,7 +17,7 @@ app.use(
   cors({
     origin: [
       'http://localhost:3000',
-      'https://khoa-luan-theta.vercel.app',
+      'https://khoa-luan-av1v.vercel.app',
     ],
     credentials: true,
   })
