@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { backend_url, server } from "../../server";
 import axios from "axios";
 import socketIO from "socket.io-client";
@@ -46,6 +47,7 @@ const getImageUrl = (image) => {
 };
 
 const ProfileInbox = ({ user }) => {
+  const [searchParams] = useSearchParams();
   const [conversations, setConversations] = useState([]);
   const [arrivalMessage, setArrivalMessage] = useState(null);
   const [currentChat, setCurrentChat] = useState(null);
@@ -117,14 +119,66 @@ const ProfileInbox = ({ user }) => {
         });
 
         setConversations(uniqueConversations);
+        
+        // Auto-open conversation with shopId from URL params
+        const shopIdFromUrl = searchParams.get('shopId');
+        if (shopIdFromUrl && uniqueConversations.length > 0 && !currentChat) {
+          const targetConversation = uniqueConversations.find(conv => 
+            conv.members.includes(shopIdFromUrl) && conv.members.includes(user?._id)
+          );
+          
+          if (targetConversation) {
+            // Find existing conversation, open it
+            setCurrentChat(targetConversation);
+            setOpen(true);
+            // Get shop info
+            axios.get(`${server}/shop/get-shop-info/${shopIdFromUrl}`)
+              .then(res => {
+                setUserData(res.data.shop);
+              })
+              .catch(err => console.log(err));
+          } else {
+            // Create new conversation if doesn't exist
+            createConversationWithShop(shopIdFromUrl);
+          }
+        }
       } catch (error) {
         console.log(error);
       }
     };
+    
+    const createConversationWithShop = async (shopId) => {
+      try {
+        const response = await axios.post(
+          `${server}/conversation/create-new-conversation`,
+          {
+            groupTitle: "user",
+            userId: user?._id,
+            sellerId: shopId,
+          },
+          { withCredentials: true }
+        );
+        
+        if (response.data.success) {
+          const newConversation = response.data.conversation;
+          setCurrentChat(newConversation);
+          setOpen(true);
+          // Get shop info
+          axios.get(`${server}/shop/get-shop-info/${shopId}`)
+            .then(res => {
+              setUserData(res.data.shop);
+            })
+            .catch(err => console.log(err));
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    
     if (user?._id) {
       getConversation();
     }
-  }, [user, messages]);
+  }, [user, messages, searchParams]);
 
   useEffect(() => {
     if (user?._id) {

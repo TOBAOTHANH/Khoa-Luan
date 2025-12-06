@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import Header from "../components/Layout/Header";
 import styles from "../styles/styles";
 import Loader from "../components/Layout/Loader";
@@ -8,7 +9,15 @@ import { useSelector } from "react-redux";
 
 const ProfilePage = () => {
   const { loading } = useSelector((state) => state.user);
+  const [searchParams] = useSearchParams();
   const [active, setActive] = useState(1);
+
+  useEffect(() => {
+    const activeParam = searchParams.get('active');
+    if (activeParam) {
+      setActive(parseInt(activeParam));
+    }
+  }, [searchParams]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">

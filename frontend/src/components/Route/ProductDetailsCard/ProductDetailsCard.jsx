@@ -109,14 +109,14 @@ const ProductDetailsCard = ({ setOpen, data }) => {
                   <AiOutlineMessage size={18} />
                   <span>Gửi tin nhắn</span>
                 </button>
-                <h5 className="text-[16px] text-[red] mt-5">(50) Đã bán</h5>
+                {/* <h5 className="text-[16px] text-[red] mt-5">(50) Đã bán</h5> */}
               </div>
 
               <div className="w-full 800px:w-[50%] pt-5 pl-[5px] pr-[5px]">
                 <h1 className={`${styles.productTitle} text-[20px]`}>
                   {data.name}
                 </h1>
-                <p>{data.description}</p>
+                {/* <p>{data.description}</p> */}
 
                 <div className="flex pt-3">
                   <h4 className={`${styles.productDiscountPrice}`}>
