@@ -13,6 +13,7 @@ import ShopWithDrawMoneyPage from "../pages/Shop/ShopWithDrawMoneyPage";
 import ShopInboxPage from "../pages/Shop/ShopInboxPage";
 import ShopDashboardUsers from "../pages/Shop/ShopDashboardUsers";
 import ShopDashboardReviews from "../pages/Shop/ShopDashboardReviews";
+import ShopExportInvoices from "../pages/Shop/ShopExportInvoices";
 export 
 {
   ShopDashboardPage,
@@ -30,6 +31,7 @@ export
   ShopInboxPage,
   ShopDashboardUsers,
   ShopDashboardReviews,
+  ShopExportInvoices,
 }
 
 

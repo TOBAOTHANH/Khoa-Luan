@@ -89,6 +89,53 @@ router.get(
   })
 );
 
+// get orders by month and year for seller
+router.get(
+  "/get-seller-orders-by-date/:shopId",
+  isSeller,
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const { month, year } = req.query;
+      const shopId = req.params.shopId;
+
+      if (!month || !year) {
+        return next(new ErrorHandler("Vui lòng cung cấp tháng và năm", 400));
+      }
+
+      const monthNum = parseInt(month);
+      const yearNum = parseInt(year);
+
+      if (monthNum < 1 || monthNum > 12) {
+        return next(new ErrorHandler("Tháng không hợp lệ", 400));
+      }
+
+      // Create date range for the month
+      const startDate = new Date(yearNum, monthNum - 1, 1);
+      const endDate = new Date(yearNum, monthNum, 0, 23, 59, 59, 999);
+
+      const orders = await Order.find({
+        "cart.shopId": shopId,
+        createdAt: {
+          $gte: startDate,
+          $lte: endDate,
+        },
+      }).sort({
+        createdAt: -1,
+      });
+
+      res.status(200).json({
+        success: true,
+        orders,
+        month: monthNum,
+        year: yearNum,
+        count: orders.length,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
 // update order status for seller
 router.put(
   "/update-order-status/:id",

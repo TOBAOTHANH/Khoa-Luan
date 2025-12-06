@@ -15,7 +15,6 @@ import { CgProfile } from "react-icons/cg";
 import DropDown from "./DropDown";
 import Navbar from "./Navbar";
 import { useSelector } from "react-redux";
-import Cart from "../Cart/Cart";
 import Wishlist from "../Whislist/Whislist";
 import NotificationComponent from "../Notification/NotificationComponent";
 import { RxCross1 } from "react-icons/rx";
@@ -31,7 +30,6 @@ const Header = ({ activeHeading }) => {
   const [searchData, setSearchData] = useState(null);
   const [active, setActive] = useState(false);
   const [dropDown, setDropDown] = useState(false);
-  const [openCart, setOpenCart] = useState(false);
   const [openWishlist, setOpenWishlist] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -254,18 +252,19 @@ const Header = ({ activeHeading }) => {
             )}
 
             <div className={`${styles.noramlFlex}`}>
-              <div
-                className="relative cursor-pointer mr-[15px] group"
-                onClick={() => setOpenCart(true)}
-              >
-                <AiOutlineShoppingCart
-                  size={30}
-                  className="text-white/90 group-hover:text-white transition-colors"
-                />
-                <span className="absolute -right-1 -top-1 rounded-full bg-gradient-to-r from-orange-500 to-red-500 w-5 h-5 p-0 m-0 text-white font-bold text-[11px] leading-tight text-center flex items-center justify-center shadow-lg">
-                  {cart && cart.length}
-                </span>
-              </div>
+              <Link to="/cart">
+                <div
+                  className="relative cursor-pointer mr-[15px] group"
+                >
+                  <AiOutlineShoppingCart
+                    size={30}
+                    className="text-white/90 group-hover:text-white transition-colors"
+                  />
+                  <span className="absolute -right-1 -top-1 rounded-full bg-gradient-to-r from-orange-500 to-red-500 w-5 h-5 p-0 m-0 text-white font-bold text-[11px] leading-tight text-center flex items-center justify-center shadow-lg">
+                    {cart && cart.length}
+                  </span>
+                </div>
+              </Link>
             </div>
 
             <div className={`${styles.noramlFlex}`}>
@@ -285,9 +284,6 @@ const Header = ({ activeHeading }) => {
                 )}
               </div>
             </div>
-
-            {/* cart popup */}
-            {openCart ? <Cart setOpenCart={setOpenCart} /> : null}
 
             {/* wishlist popup */}
             {openWishlist ? (
@@ -322,18 +318,17 @@ const Header = ({ activeHeading }) => {
             </Link>
           </div>
           <div>
-            <div
-              className="relative mr-[20px]"
-              onClick={() => setOpenCart(true)}
-            >
-              <AiOutlineShoppingCart size={30} />
-              <span class="absolute right-0 top-0 rounded-full bg-[#3bc177] w-4 h-4 top right p-0 m-0 text-white font-mono text-[12px]  leading-tight text-center">
-                {cart && cart.length}
-              </span>
-            </div>
+            <Link to="/cart">
+              <div
+                className="relative mr-[20px]"
+              >
+                <AiOutlineShoppingCart size={30} />
+                <span class="absolute right-0 top-0 rounded-full bg-[#3bc177] w-4 h-4 top right p-0 m-0 text-white font-mono text-[12px]  leading-tight text-center">
+                  {cart && cart.length}
+                </span>
+              </div>
+            </Link>
           </div>
-          {/* cart popup */}
-          {openCart ? <Cart setOpenCart={setOpenCart} /> : null}
 
           {/* wishlist popup */}
           {openWishlist ? <Wishlist setOpenWishlist={setOpenWishlist} /> : null}

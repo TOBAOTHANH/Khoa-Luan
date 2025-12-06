@@ -12,7 +12,32 @@ import { FaMapMarkerAlt, FaTruck } from "react-icons/fa";
 
 const Checkout = () => {
   const { user } = useSelector((state) => state.user);
-  const { cart } = useSelector((state) => state.cart);
+  const { cart: fullCart } = useSelector((state) => state.cart);
+  
+  // Use selected items from cart page if available, otherwise use full cart
+  const [cart, setCart] = useState(() => {
+    const selectedItems = localStorage.getItem("selectedCartItems");
+    if (selectedItems) {
+      try {
+        const parsed = JSON.parse(selectedItems);
+        if (parsed && parsed.length > 0) {
+          return parsed;
+        }
+      } catch (e) {
+        // If parsing fails, use full cart
+      }
+    }
+    return fullCart;
+  });
+
+  // Update cart if fullCart changes and no selected items
+  useEffect(() => {
+    const selectedItems = localStorage.getItem("selectedCartItems");
+    if (!selectedItems) {
+      setCart(fullCart);
+    }
+  }, [fullCart]);
+  
   const [country, setCountry] = useState("VN"); // Mặc định là Việt Nam
   const [city, setCity] = useState("");
   const [district, setDistrict] = useState("");
@@ -109,6 +134,8 @@ const Checkout = () => {
 
       // update local storage with the updated orders array
       localStorage.setItem("latestOrder", JSON.stringify(orderData));
+      // Clear selected items after checkout
+      localStorage.removeItem("selectedCartItems");
       navigate("/payment");
     }
   };
