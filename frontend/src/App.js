@@ -21,6 +21,7 @@ import {
   TrackOrderPage,
   ShopAllRefunds,
   UserInbox,
+  CartPage,
 } from './routes/Routes';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -43,6 +44,7 @@ import {
   ShopInboxPage,
   ShopDashboardUsers,
   ShopDashboardReviews,
+  ShopExportInvoices,
 } from './routes/ShopRoutes.js';
 import {
   AdminDashboardPage,
@@ -115,6 +117,7 @@ const App = () => {
           <Route path='/best-selling' element={<BestSellingPage />} />
           <Route path='/events' element={<EventsPage />} />
           <Route path='/faq' element={<FAQPage />} />
+          <Route path='/cart' element={<CartPage />} />
           <Route path='/order/success' element={<OrderSuccessPage />} />
 
           <Route
@@ -295,6 +298,14 @@ const App = () => {
             element={
               <SellerProtectedRoute>
                 <ShopDashboardReviews />
+              </SellerProtectedRoute>
+            }
+          />
+          <Route
+            path='/dashboard-export-invoices'
+            element={
+              <SellerProtectedRoute>
+                <ShopExportInvoices />
               </SellerProtectedRoute>
             }
           />

@@ -8,6 +8,7 @@ import { CiMoneyBill, CiSettings } from "react-icons/ci";
 import { Link } from "react-router-dom";
 import { BiMessageSquareDetail } from "react-icons/bi";
 import { HiOutlineReceiptRefund, HiOutlineUserGroup } from "react-icons/hi";
+import { AiOutlineFileExcel } from "react-icons/ai";
 
 const DashboardSideBar = ({ active }) => {
   return (
@@ -151,7 +152,7 @@ const DashboardSideBar = ({ active }) => {
         </Link>
       </div>
 
-      <div className="w-full flex items-center p-4">
+      {/* <div className="w-full flex items-center p-4">
         <Link to="/dashboard-refunds" className="w-full flex items-center">
           <HiOutlineReceiptRefund
             size={30}
@@ -164,7 +165,7 @@ const DashboardSideBar = ({ active }) => {
             Hoàn Tiền
           </h5>
         </Link>
-      </div>
+      </div> */}
 
       <div className="w-full flex items-center p-4">
         <Link to="/dashboard-users" className="w-full flex items-center">
@@ -192,6 +193,21 @@ const DashboardSideBar = ({ active }) => {
               }`}
           >
             Phản Hồi Đánh Giá
+          </h5>
+        </Link>
+      </div>
+
+      <div className="w-full flex items-center p-4">
+        <Link to="/dashboard-export-invoices" className="w-full flex items-center">
+          <AiOutlineFileExcel
+            size={30}
+            color={`${active === 14 ? "crimson" : "#555"}`}
+          />
+          <h5
+            className={`hidden 800px:block pl-2 text-[18px] font-[400] ${active === 14 ? "text-[crimson]" : "text-[#555]"
+              }`}
+          >
+            Xuất Hóa Đơn Excel
           </h5>
         </Link>
       </div>

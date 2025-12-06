@@ -18,6 +18,7 @@ import OrderDetailsPage from "../pages/OrderDetailsPage";
 import TrackOrderPage from "../pages/TrackOrderPage";
 import ShopAllRefunds from "../pages/ShopAllRefunds";
 import UserInbox from "../pages/UserInbox";
+import CartPage from "../pages/CartPage";
 export {
      LoginPage,
      SignupPage,
@@ -38,5 +39,6 @@ export {
      OrderDetailsPage,
      TrackOrderPage,
      ShopAllRefunds,
-     UserInbox
+     UserInbox,
+     CartPage
 };

@@ -58,6 +58,9 @@ const productSchema = new mongoose.Schema({
       productId: {
         type: String,
       },
+      reviewImages: [{
+        type: String,
+      }],
       shopFeedback: {
         type: String,
         default: "",

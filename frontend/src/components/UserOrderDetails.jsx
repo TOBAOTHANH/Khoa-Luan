@@ -19,6 +19,8 @@ const UserOrderDetails = () => {
   const [comment, setComment] = useState("");
   const [selectedItem, setSelectedItem] = useState(null);
   const [rating, setRating] = useState(1);
+  const [reviewImages, setReviewImages] = useState([]);
+  const [uploading, setUploading] = useState(false);
 
   const { id } = useParams();
 
@@ -27,6 +29,43 @@ const UserOrderDetails = () => {
   }, [dispatch, user._id]);
 
   const data = orders && orders.find((item) => item._id === id);
+
+  const handleImageUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length + reviewImages.length > 5) {
+      toast.error("Chỉ có thể upload tối đa 5 ảnh!");
+      return;
+    }
+
+    setUploading(true);
+    const formData = new FormData();
+    files.forEach((file) => {
+      formData.append("images", file);
+    });
+
+    try {
+      const { data } = await axios.post(
+        `${server}/product/upload-review-images`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          withCredentials: true,
+        }
+      );
+      setReviewImages([...reviewImages, ...data.images]);
+      toast.success("Upload ảnh thành công!");
+    } catch (error) {
+      toast.error("Upload ảnh thất bại!");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeImage = (index) => {
+    setReviewImages(reviewImages.filter((_, i) => i !== index));
+  };
 
   const reviewHandler = async (e) => {
     await axios
@@ -38,6 +77,7 @@ const UserOrderDetails = () => {
           comment,
           productId: selectedItem?._id,
           orderId: id,
+          reviewImages,
         },
         { withCredentials: true }
       )
@@ -46,6 +86,7 @@ const UserOrderDetails = () => {
         dispatch(getAllOrdersOfUser(user._id));
         setComment("");
         setRating(null);
+        setReviewImages([]);
         setOpen(false);
       })
       .catch((error) => {
@@ -81,7 +122,7 @@ const UserOrderDetails = () => {
         </div>
 
         {/* Order Info Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
           <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
             <p className="text-sm text-gray-600 mb-1">Mã đơn hàng</p>
             <h5 className="text-lg font-bold text-gray-800">
@@ -96,6 +137,12 @@ const UserOrderDetails = () => {
                 month: 'long', 
                 day: 'numeric' 
               }) : 'N/A'}
+            </h5>
+          </div>
+          <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
+            <p className="text-sm text-gray-600 mb-1">Trạng thái đơn hàng</p>
+            <h5 className="text-lg font-bold text-gray-800">
+              {data?.status ? getOrderStatusInVietnamese(data.status) : 'N/A'}
             </h5>
           </div>
         </div>
@@ -129,16 +176,25 @@ const UserOrderDetails = () => {
                       <span className="text-base">Tổng: <strong className="text-blue-600">US${(item.discountPrice * item.qty).toFixed(2)}</strong></span>
                     </div>
                   </div>
-                  {!item.isReviewed && data?.status === "Delivered" && (
-                    <button
-                      className="ml-4 px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
-                      onClick={() => {
-                        setOpen(true);
-                        setSelectedItem(item);
-                      }}
-                    >
-                      ⭐ Viết đánh giá
-                    </button>
+                  {data?.status === "Delivered" && (
+                    item.isReviewed ? (
+                      <button
+                        className="ml-4 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-lg shadow-md cursor-default"
+                        disabled
+                      >
+                        ✓ Đã đánh giá
+                      </button>
+                    ) : (
+                      <button
+                        className="ml-4 px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                        onClick={() => {
+                          setOpen(true);
+                          setSelectedItem(item);
+                        }}
+                      >
+                        ⭐ Viết đánh giá
+                      </button>
+                    )
                   )}
                 </div>
               )
@@ -237,6 +293,90 @@ const UserOrderDetails = () => {
                 placeholder="Sản phẩm của bạn như thế nào? Hãy viết cảm nhận của bạn!"
                 className="w-full border-2 border-gray-300 rounded-lg p-4 outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
               ></textarea>
+            </div>
+
+            {/* Review Images Upload - Redesigned */}
+            <div className="mb-6">
+              <label className="block text-lg font-semibold text-gray-800 mb-3">
+                Ảnh minh chứng
+                <span className="ml-2 text-sm font-normal text-gray-500">
+                  (tùy chọn, tối đa 5 ảnh)
+                </span>
+              </label>
+              
+              {/* Image Preview Grid */}
+              {reviewImages.length > 0 && (
+                <div className="grid grid-cols-5 gap-3 mb-4">
+                  {reviewImages.map((img, index) => (
+                    <div key={index} className="relative group">
+                      <img
+                        src={`${backend_url}${img}`}
+                        alt={`Review ${index + 1}`}
+                        className="w-full h-24 object-cover rounded-lg border-2 border-gray-200 shadow-sm"
+                      />
+                      <button
+                        onClick={() => removeImage(index)}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors shadow-lg opacity-0 group-hover:opacity-100"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Custom File Input Button */}
+              <label
+                className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-all ${
+                  uploading || reviewImages.length >= 5
+                    ? "border-gray-300 bg-gray-100 cursor-not-allowed opacity-50"
+                    : "border-purple-300 bg-purple-50 hover:bg-purple-100 hover:border-purple-400"
+                }`}
+              >
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <svg
+                    className="w-10 h-10 mb-3 text-purple-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                    />
+                  </svg>
+                  <p className="mb-2 text-sm text-gray-700">
+                    <span className="font-semibold text-purple-600">Click để chọn ảnh</span> hoặc kéo thả
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    PNG, JPG, GIF (tối đa 5 ảnh)
+                  </p>
+                </div>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={uploading || reviewImages.length >= 5}
+                  className="hidden"
+                />
+              </label>
+              {uploading && (
+                <div className="mt-3 flex items-center justify-center gap-2 text-sm text-purple-600">
+                  <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>Đang upload ảnh...</span>
+                </div>
+              )}
+              {reviewImages.length >= 5 && (
+                <p className="mt-2 text-sm text-orange-600 text-center">
+                  Đã đạt giới hạn 5 ảnh
+                </p>
+              )}
             </div>
 
             {/* Submit Button */}

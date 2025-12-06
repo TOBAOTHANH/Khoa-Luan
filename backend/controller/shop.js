@@ -58,7 +58,7 @@ router.post('/create-shop', upload.single('file'), async (req, res, next) => {
     // const activationUrl = `http://localhost:3000/seller/activation/${activationToken}`;
     const isProduction = process.env.NODE_ENV === 'production';
     const activationUrl = isProduction
-      ? `https://khoa-luan-theta.vercel.app/.app/activation/${activationToken}`
+      ? `https://khoa-luan-av1v.vercel.app/.app/activation/${activationToken}`
       : `http://localhost:3000/seller/activation/${activationToken}`;
 
     // Gửi email kích hoạt

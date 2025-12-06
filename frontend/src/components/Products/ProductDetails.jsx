@@ -20,11 +20,15 @@ import { addTocart } from "../../redux/actions/cart";
 import Ratings from "./Ratings";
 import axios from "axios";
 import AccessoryRecommendations from "./AccessoryRecommendations";
+import ImageModal from "../Common/ImageModal";
 
 const ProductDetails = ({ data }) => {
   const [count, setCount] = useState(1);
   const [click, setClick] = useState(false);
   const [select, setSelect] = useState(0);
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const { user, isAuthenticated } = useSelector((state) => state.user);
   const { wishlist } = useSelector((state) => state.wishlist);
   const { cart } = useSelector((state) => state.cart);
@@ -256,6 +260,9 @@ const ProductDetailsInfo = ({ data, products, totalReviewsLength, averageRating 
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [selectedReview, setSelectedReview] = useState(null);
   const [shopFeedback, setShopFeedback] = useState("");
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const dispatch = useDispatch();
   const isShopOwner = seller?._id === data?.shop?._id || user?.role === "Seller";
 
@@ -334,6 +341,31 @@ const ProductDetailsInfo = ({ data, products, totalReviewsLength, averageRating 
                       </div>
                     </div>
                     <p className="text-gray-700 mb-3">{item.comment}</p>
+                    
+                    {/* Review Images */}
+                    {item.reviewImages && item.reviewImages.length > 0 && (
+                      <div className="mt-3 mb-3">
+                        <div className="flex flex-wrap gap-2">
+                          {item.reviewImages.map((img, imgIndex) => (
+                            <img
+                              key={imgIndex}
+                              src={`${backend_url}${img}`}
+                              alt={`Review image ${imgIndex + 1}`}
+                              className="w-20 h-20 md:w-24 md:h-24 object-contain rounded-lg border-2 border-gray-200 cursor-pointer hover:scale-105 transition-transform bg-gray-50"
+                              onClick={() => {
+                                const imageUrls = item.reviewImages.map(i => `${backend_url}${i}`);
+                                setSelectedImages(imageUrls);
+                                setSelectedImageIndex(imgIndex);
+                                setImageModalOpen(true);
+                              }}
+                              onError={(e) => {
+                                e.target.src = "https://via.placeholder.com/150";
+                              }}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     
                     {/* Shop Feedback */}
                     {item.shopFeedback && (
@@ -511,6 +543,17 @@ const ProductDetailsInfo = ({ data, products, totalReviewsLength, averageRating 
           </div>
         </div>
       )}
+
+      {/* Image Modal */}
+      <ImageModal
+        isOpen={imageModalOpen}
+        onClose={() => {
+          setImageModalOpen(false);
+          setSelectedImages([]);
+        }}
+        images={selectedImages}
+        currentIndex={selectedImageIndex}
+      />
     </div>
   );
 };

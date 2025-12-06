@@ -89,6 +89,53 @@ router.get(
   })
 );
 
+// get orders by month and year for seller
+router.get(
+  "/get-seller-orders-by-date/:shopId",
+  isSeller,
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const { month, year } = req.query;
+      const shopId = req.params.shopId;
+
+      if (!month || !year) {
+        return next(new ErrorHandler("Vui lòng cung cấp tháng và năm", 400));
+      }
+
+      const monthNum = parseInt(month);
+      const yearNum = parseInt(year);
+
+      if (monthNum < 1 || monthNum > 12) {
+        return next(new ErrorHandler("Tháng không hợp lệ", 400));
+      }
+
+      // Create date range for the month
+      const startDate = new Date(yearNum, monthNum - 1, 1);
+      const endDate = new Date(yearNum, monthNum, 0, 23, 59, 59, 999);
+
+      const orders = await Order.find({
+        "cart.shopId": shopId,
+        createdAt: {
+          $gte: startDate,
+          $lte: endDate,
+        },
+      }).sort({
+        createdAt: -1,
+      });
+
+      res.status(200).json({
+        success: true,
+        orders,
+        month: monthNum,
+        year: yearNum,
+        count: orders.length,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
 // update order status for seller
 router.put(
   "/update-order-status/:id",
@@ -110,6 +157,7 @@ router.put(
         productsUpdated = true;
       }
 
+      const oldStatus = order.status;
       order.status = req.body.status;
 
       if (req.body.status === "Delivered") {
@@ -127,6 +175,88 @@ router.put(
       }
 
       await order.save({ validateBeforeSave: false });
+
+      // Create notification for user about order status change
+      if (oldStatus !== req.body.status && order.user?._id) {
+        try {
+          const Notification = require("../model/notification");
+          const { backend_url } = require("../server");
+          
+          // Delete old notifications for this order with same type
+          await Notification.deleteMany({
+            userId: order.user._id.toString(),
+            type: "order_status",
+            $or: [
+              { link: `/user/order/${order._id}` },
+              { link: `/order/${order._id}` },
+              { link: { $regex: `order/${order._id}` } }
+            ],
+          });
+
+          // Get first product image for notification
+          const firstProductImage = order.cart && order.cart.length > 0 && order.cart[0].images && order.cart[0].images[0]
+            ? `${backend_url}${order.cart[0].images[0]}`
+            : null;
+
+          // Status messages with detailed descriptions
+          const statusConfig = {
+            "Processing": {
+              message: "Đơn hàng của bạn đang được xử lý",
+              description: `Đơn hàng #${order._id.toString().slice(0, 8)} đang được shop chuẩn bị. Bạn sẽ nhận được thông báo khi đơn hàng được gửi đi.`,
+              link: `/user/order/${order._id}`,
+            },
+            "Transferred to delivery partner": {
+              message: "Đơn hàng đã được chuyển cho đơn vị vận chuyển",
+              description: `Đơn hàng #${order._id.toString().slice(0, 8)} đã được shop đóng gói và chuyển cho đơn vị vận chuyển. Đơn hàng sẽ được giao đến bạn trong thời gian sớm nhất.`,
+              link: `/user/order/${order._id}`,
+            },
+            "Shipping": {
+              message: "Đơn hàng đang được vận chuyển",
+              description: `Đơn hàng #${order._id.toString().slice(0, 8)} đang trên đường đến bạn. Hãy chuẩn bị sẵn sàng để nhận hàng!`,
+              link: `/user/order/${order._id}`,
+            },
+            "Delivered": {
+              message: "Đơn hàng đã được giao thành công",
+              description: `Đơn hàng #${order._id.toString().slice(0, 8)} đã được giao thành công! Hãy đánh giá sản phẩm để giúp shop cải thiện dịch vụ.`,
+              link: `/user/order/${order._id}`, // Will be updated to review page
+            },
+            "Processing refund": {
+              message: "Yêu cầu hoàn tiền đang được xử lý",
+              description: `Yêu cầu hoàn tiền cho đơn hàng #${order._id.toString().slice(0, 8)} đang được xử lý. Bạn sẽ nhận được thông báo khi có kết quả.`,
+              link: `/user/order/${order._id}`,
+            },
+            "Refund Success": {
+              message: "Hoàn tiền thành công",
+              description: `Yêu cầu hoàn tiền cho đơn hàng #${order._id.toString().slice(0, 8)} đã được chấp nhận. Tiền sẽ được hoàn về tài khoản của bạn trong 3-5 ngày làm việc.`,
+              link: `/user/order/${order._id}`,
+            },
+          };
+
+          const config = statusConfig[req.body.status] || {
+            message: `Đơn hàng của bạn đã được cập nhật: ${req.body.status}`,
+            description: `Trạng thái đơn hàng #${order._id.toString().slice(0, 8)} đã thay đổi.`,
+            link: `/user/order/${order._id}`,
+          };
+
+          // For Delivered status, link to user order page (user can review from there)
+          // The order page already has review buttons for each product
+          const notificationLink = req.body.status === "Delivered" 
+            ? `/user/order/${order._id}` 
+            : config.link;
+
+          await Notification.create({
+            userId: order.user._id.toString(),
+            type: "order_status",
+            title: "Cập nhật trạng thái đơn hàng",
+            message: config.message,
+            description: config.description,
+            imageUrl: firstProductImage,
+            link: notificationLink,
+          });
+        } catch (notifError) {
+          console.error("Error creating order status notification:", notifError);
+        }
+      }
 
       res.status(200).json({
         success: true,
@@ -178,9 +308,47 @@ router.put(
         return next(new ErrorHandler("Không tìm thấy đơn hàng với id này", 400));
       }
 
+      const oldStatus = order.status;
       order.status = req.body.status;
 
       await order.save({ validateBeforeSave: false });
+
+      // Create notification for user about refund request
+      if (oldStatus !== req.body.status && order.user?._id) {
+        try {
+          const Notification = require("../model/notification");
+          const { backend_url } = require("../server");
+          
+          // Delete old notifications for this order with same type
+          await Notification.deleteMany({
+            userId: order.user._id.toString(),
+            type: "order_status",
+            $or: [
+              { link: `/user/order/${order._id}` },
+              { link: `/order/${order._id}` },
+              { link: { $regex: `order/${order._id}` } }
+            ],
+          });
+
+          // Get first product image for notification
+          const firstProductImage = order.cart && order.cart.length > 0 && order.cart[0].images && order.cart[0].images[0]
+            ? `${backend_url}${order.cart[0].images[0]}`
+            : null;
+
+          // Create new notification
+          await Notification.create({
+            userId: order.user._id.toString(),
+            type: "order_status",
+            title: "Yêu cầu hoàn tiền",
+            message: "Yêu cầu hoàn tiền của bạn đã được gửi và đang được xử lý",
+            description: `Yêu cầu hoàn tiền cho đơn hàng #${order._id.toString().slice(0, 8)} đang được xử lý. Bạn sẽ nhận được thông báo khi có kết quả.`,
+            imageUrl: firstProductImage,
+            link: `/user/order/${order._id}`,
+          });
+        } catch (notifError) {
+          console.error("Error creating refund notification:", notifError);
+        }
+      }
 
       res.status(200).json({
         success: true,
@@ -205,9 +373,47 @@ router.put(
         return next(new ErrorHandler("Không tìm thấy đơn hàng với id này", 400));
       }
 
+      const oldStatus = order.status;
       order.status = req.body.status;
 
       await order.save();
+
+      // Create notification for user about refund success
+      if (oldStatus !== req.body.status && order.user?._id) {
+        try {
+          const Notification = require("../model/notification");
+          const { backend_url } = require("../server");
+          
+          // Delete old notifications for this order with same type
+          await Notification.deleteMany({
+            userId: order.user._id.toString(),
+            type: "order_status",
+            $or: [
+              { link: `/user/order/${order._id}` },
+              { link: `/order/${order._id}` },
+              { link: { $regex: `order/${order._id}` } }
+            ],
+          });
+
+          // Get first product image for notification
+          const firstProductImage = order.cart && order.cart.length > 0 && order.cart[0].images && order.cart[0].images[0]
+            ? `${backend_url}${order.cart[0].images[0]}`
+            : null;
+
+          // Create new notification
+          await Notification.create({
+            userId: order.user._id.toString(),
+            type: "order_status",
+            title: "Hoàn tiền thành công",
+            message: "Yêu cầu hoàn tiền của bạn đã được chấp nhận và hoàn tiền thành công",
+            description: `Yêu cầu hoàn tiền cho đơn hàng #${order._id.toString().slice(0, 8)} đã được chấp nhận. Tiền sẽ được hoàn về tài khoản của bạn trong 3-5 ngày làm việc.`,
+            imageUrl: firstProductImage,
+            link: `/user/order/${order._id}`,
+          });
+        } catch (notifError) {
+          console.error("Error creating refund success notification:", notifError);
+        }
+      }
 
       res.status(200).json({
         success: true,

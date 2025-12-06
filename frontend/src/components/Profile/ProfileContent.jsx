@@ -16,6 +16,7 @@ import {
   MdTrackChanges,
 } from "react-icons/md";
 import { Country, State } from "country-state-city";
+import { vietnamDistricts } from "../../utils/vietnamDistricts";
 import { toast } from "react-toastify";
 import styles from "../../styles/styles";
 import { DataGrid } from "@mui/x-data-grid";
@@ -543,14 +544,47 @@ const ChangePassword = () => {
 
 const Address = () => {
   const [open, setOpen] = useState(false);
-  const [country, setCountry] = useState("");
+  const [country, setCountry] = useState("VN");
   const [city, setCity] = useState("");
+  const [district, setDistrict] = useState("");
   const [zipCode, setZipCode] = useState();
   const [address1, setAddress1] = useState("");
   const [address2, setAddress2] = useState("");
   const [addressType, setAddressType] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const { user } = useSelector((state) => state.user);
   const dispatch = useDispatch();
+
+  // Helper function to normalize city name for vietnamDistricts lookup
+  const normalizeCityName = (cityName) => {
+    if (!cityName) return "";
+    // Try exact match first
+    if (vietnamDistricts[cityName]) return cityName;
+    // Try common variations
+    const variations = {
+      "Ho Chi Minh City": "Hồ Chí Minh",
+      "TP Hồ Chí Minh": "Hồ Chí Minh",
+      "Hồ Chí Minh": "Hồ Chí Minh",
+      "Bà Rịa - Vũng Tàu": "Bà Rịa-Vũng Tàu",
+      "Bà Rịa-Vũng Tàu": "Bà Rịa-Vũng Tàu",
+    };
+    if (variations[cityName]) return variations[cityName];
+    // Try to find by removing common prefixes/suffixes
+    const normalized = cityName.replace(/^(Thành phố|TP|Tỉnh)\s*/i, "").trim();
+    if (vietnamDistricts[normalized]) return normalized;
+    // Try to find by partial match
+    for (const key in vietnamDistricts) {
+      if (key.includes(cityName) || cityName.includes(key)) {
+        return key;
+      }
+    }
+    return cityName; // Return original if no match found
+  };
+
+  // Reset district when city changes
+  useEffect(() => {
+    setDistrict("");
+  }, [city]);
 
   const addressTypeData = [
     {
@@ -567,26 +601,30 @@ const Address = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (addressType === "" || country === "" || city === "") {
+    if (addressType === "" || country === "" || city === "" || district === "" || address1 === "" || zipCode === null) {
       toast.error("Vui lòng điền đầy đủ tất cả các trường!");
     } else {
       dispatch(
         updatUserAddress(
           country,
           city,
+          district,
           address1,
           address2,
           zipCode,
-          addressType
+          addressType,
+          phoneNumber || user?.phoneNumber || ""
         )
       );
       setOpen(false);
-      setCountry("");
+      setCountry("VN");
       setCity("");
+      setDistrict("");
       setAddress1("");
       setAddress2("");
       setZipCode(null);
       setAddressType("");
+      setPhoneNumber("");
     }
   };
 
@@ -639,7 +677,7 @@ const Address = () => {
                   </div>
 
                   <div className="w-full pb-2">
-                    <label className="block pb-2">Chọn thành phố của bạn</label>
+                    <label className="block pb-2">Tỉnh/Thành phố</label>
                     <select
                       name=""
                       id=""
@@ -648,14 +686,14 @@ const Address = () => {
                       className="w-[95%] border h-[40px] rounded-[5px]"
                     >
                       <option value="" className="block border pb-2">
-                        Chọn thành phố của bạn
+                        Chọn tỉnh/thành phố
                       </option>
                       {State &&
                         State.getStatesOfCountry(country).map((item) => (
                           <option
                             className="block pb-2"
                             key={item.isoCode}
-                            value={item.isoCode}
+                            value={item.name}
                           >
                             {item.name}
                           </option>
@@ -664,23 +702,63 @@ const Address = () => {
                   </div>
 
                   <div className="w-full pb-2">
-                    <label className="block pb-2">Địa chỉ 1</label>
+                    <label className="block pb-2">Quận/Huyện</label>
+                    <select
+                      name=""
+                      id=""
+                      value={district}
+                      onChange={(e) => setDistrict(e.target.value)}
+                      className="w-[95%] border h-[40px] rounded-[5px]"
+                      disabled={!city}
+                    >
+                      <option value="" className="block border pb-2">
+                        {city ? "Chọn quận/huyện" : "Chọn tỉnh/thành phố trước"}
+                      </option>
+                      {city && (() => {
+                        const normalizedCity = normalizeCityName(city);
+                        return vietnamDistricts[normalizedCity] && vietnamDistricts[normalizedCity].map((item, index) => (
+                          <option
+                            className="block pb-2"
+                            key={index}
+                            value={item}
+                          >
+                            {item}
+                          </option>
+                        ));
+                      })()}
+                    </select>
+                  </div>
+
+                  <div className="w-full pb-2">
+                    <label className="block pb-2">Địa chỉ chi tiết</label>
                     <input
                       type="address"
                       className={`${styles.input}`}
                       required
                       value={address1}
                       onChange={(e) => setAddress1(e.target.value)}
+                      placeholder="Số nhà, tên đường, phường/xã..."
                     />
                   </div>
                   <div className="w-full pb-2">
-                    <label className="block pb-2">Địa chỉ 2</label>
+                    <label className="block pb-2">Địa chỉ bổ sung (tùy chọn)</label>
                     <input
                       type="address"
                       className={`${styles.input}`}
-                      required
                       value={address2}
                       onChange={(e) => setAddress2(e.target.value)}
+                      placeholder="Tầng, căn hộ, tòa nhà..."
+                    />
+                  </div>
+
+                  <div className="w-full pb-2">
+                    <label className="block pb-2">Số điện thoại</label>
+                    <input
+                      type="tel"
+                      className={`${styles.input}`}
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      placeholder={user?.phoneNumber || "Nhập số điện thoại"}
                     />
                   </div>
 
@@ -757,12 +835,17 @@ const Address = () => {
             </div>
             <div className="pl-8 flex items-center">
               <h6 className="text-[12px] 800px:text-[unset]">
-                {item.address1} {item.address2}
+                {item.address1} {item.address2 ? `, ${item.address2}` : ""}
               </h6>
             </div>
             <div className="pl-8 flex items-center">
               <h6 className="text-[12px] 800px:text-[unset]">
-                {user && user.phoneNumber}
+                {item.city} {item.district ? `, ${item.district}` : ""}
+              </h6>
+            </div>
+            <div className="pl-8 flex items-center">
+              <h6 className="text-[12px] 800px:text-[unset]">
+                {item.phoneNumber || (user && user.phoneNumber) || "N/A"}
               </h6>
             </div>
             <div className="min-w-[10%] flex items-center justify-between pl-8">

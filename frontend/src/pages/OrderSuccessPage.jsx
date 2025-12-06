@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import Footer from "../components/Layout/Footer";
 import Header from "../components/Layout/Header";
 import Lottie from "react-lottie";
@@ -7,6 +8,9 @@ import animationData from "../Assests/animations/107043-success.json";
 import { AiFillCheckCircle } from "react-icons/ai";
 import { HiShoppingBag } from "react-icons/hi";
 import { MdLocalShipping } from "react-icons/md";
+import { getAllOrdersOfUser } from "../redux/actions/order";
+import axios from "axios";
+import { server } from "../server";
 
 const OrderSuccessPage = () => {
   return (
@@ -20,22 +24,29 @@ const OrderSuccessPage = () => {
 
 const Success = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.user);
+  const { orders } = useSelector((state) => state.order);
   const [orderIds, setOrderIds] = React.useState([]);
+  const [loadingOrder, setLoadingOrder] = React.useState(false);
   
   React.useEffect(() => {
-    // Lấy order IDs từ localStorage
+    // Lấy order IDs từ localStorage (không xóa ngay)
     const savedOrderIds = localStorage.getItem("latestOrderIds");
     if (savedOrderIds) {
       try {
         const ids = JSON.parse(savedOrderIds);
         setOrderIds(ids);
-        // Xóa sau khi đã lấy
-        localStorage.removeItem("latestOrderIds");
       } catch (error) {
         console.error("Error parsing order IDs:", error);
       }
     }
-  }, []);
+    
+    // Fetch orders từ API nếu có user
+    if (user && user._id) {
+      dispatch(getAllOrdersOfUser(user._id));
+    }
+  }, [user, dispatch]);
   
   const defaultOptions = {
     loop: false,
@@ -46,12 +57,56 @@ const Success = () => {
     },
   };
   
-  const handleViewOrder = () => {
+  const handleViewOrder = async () => {
+    // Ưu tiên dùng orderIds từ localStorage
     if (orderIds && orderIds.length > 0) {
-      // Link đến đơn hàng đầu tiên
+      // Xóa localStorage sau khi đã dùng
+      localStorage.removeItem("latestOrderIds");
       navigate(`/user/order/${orderIds[0]}`);
+      return;
+    }
+    
+    // Nếu không có orderIds, thử lấy từ Redux store (orders mới nhất)
+    if (orders && orders.length > 0) {
+      // Sắp xếp theo thời gian tạo (mới nhất trước)
+      const sortedOrders = [...orders].sort((a, b) => {
+        const dateA = new Date(a.createdAt || a.created_at || 0);
+        const dateB = new Date(b.createdAt || b.created_at || 0);
+        return dateB - dateA;
+      });
+      navigate(`/user/order/${sortedOrders[0]._id}`);
+      return;
+    }
+    
+    // Nếu vẫn không có, fetch order mới nhất từ API
+    if (user && user._id) {
+      setLoadingOrder(true);
+      try {
+        const { data } = await axios.get(
+          `${server}/order/get-all-orders/${user._id}`,
+          { withCredentials: true }
+        );
+        if (data.orders && data.orders.length > 0) {
+          // Sắp xếp theo thời gian tạo (mới nhất trước)
+          const sortedOrders = [...data.orders].sort((a, b) => {
+            const dateA = new Date(a.createdAt || a.created_at || 0);
+            const dateB = new Date(b.createdAt || b.created_at || 0);
+            return dateB - dateA;
+          });
+          navigate(`/user/order/${sortedOrders[0]._id}`);
+        } else {
+          // Fallback về profile nếu không có order nào
+          navigate("/profile");
+        }
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+        // Fallback về profile nếu có lỗi
+        navigate("/profile");
+      } finally {
+        setLoadingOrder(false);
+      }
     } else {
-      // Fallback về profile nếu không có order ID
+      // Fallback về profile nếu không có user
       navigate("/profile");
     }
   };
@@ -138,9 +193,10 @@ const Success = () => {
               </button>
               <button
                 onClick={handleViewOrder}
-                className="px-8 py-4 bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 hover:border-green-500 hover:text-green-600"
+                disabled={loadingOrder}
+                className="px-8 py-4 bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 hover:border-green-500 hover:text-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Xem đơn hàng của tôi
+                {loadingOrder ? "Đang tải..." : "Xem đơn hàng của tôi"}
               </button>
             </div>
 

@@ -9,6 +9,7 @@ import styles from "../../styles/styles";
 import { TfiGallery } from "react-icons/tfi";
 import socketIO from "socket.io-client";
 import { format } from "timeago.js";
+import ImageModal from "../Common/ImageModal";
 const ENDPOINT = "http://localhost:4000/";
 const socketId = socketIO(ENDPOINT, { transports: ["websocket"] });
 
@@ -24,6 +25,8 @@ const DashboardMessages = () => {
   const [activeStatus, setActiveStatus] = useState(false);
   const [images, setImages] = useState();
   const [open, setOpen] = useState(false);
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -275,6 +278,10 @@ const DashboardMessages = () => {
           scrollRef={scrollRef}
           setMessages={setMessages}
           handleImageUpload={handleImageUpload}
+          setSelectedImage={setSelectedImage}
+          setImageModalOpen={setImageModalOpen}
+          imageModalOpen={imageModalOpen}
+          selectedImage={selectedImage}
         />
       )}
     </div>
@@ -353,6 +360,10 @@ const MessageList = ({
 };
 
 const SellerInbox = ({
+  setSelectedImage,
+  setImageModalOpen,
+  imageModalOpen,
+  selectedImage,
   scrollRef,
   setOpen,
   newMessage,
@@ -407,11 +418,11 @@ const SellerInbox = ({
                   <div className="mb-2">
                     <img
                       src={item.images?.url || item.images}
-                      className="w-[300px] h-[300px] object-cover rounded-[10px] mr-2 cursor-pointer hover:opacity-90 transition-opacity"
+                      className="max-w-[250px] max-h-[250px] object-contain rounded-[10px] mr-2 cursor-pointer hover:opacity-90 transition-opacity border border-gray-200"
                       alt="Hình ảnh được chia sẻ"
                       onClick={() => {
-                        const newWindow = window.open();
-                        newWindow.document.write(`<img src="${item.images?.url || item.images}" style="max-width: 100%; height: auto;" />`);
+                        setSelectedImage(item.images?.url || item.images);
+                        setImageModalOpen(true);
                       }}
                       onError={(e) => {
                         e.target.src = item.images?.url || item.images || "https://via.placeholder.com/300";
@@ -475,6 +486,13 @@ const SellerInbox = ({
           </label>
         </div>
       </form>
+
+      {/* Image Modal */}
+      <ImageModal
+        isOpen={imageModalOpen}
+        onClose={() => setImageModalOpen(false)}
+        imageUrl={selectedImage}
+      />
     </div>
   );
 };

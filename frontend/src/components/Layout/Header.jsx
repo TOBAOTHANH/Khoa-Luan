@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import styles from "../../styles/styles";
 import { categoriesData } from "../../static/data";
@@ -7,6 +7,7 @@ import {
   AiOutlinePhone,
   AiOutlineSearch,
   AiOutlineShoppingCart,
+  AiOutlineBell,
 } from "react-icons/ai";
 import { IoIosArrowDown, IoIosArrowForward } from "react-icons/io";
 import { BiMenuAltLeft } from "react-icons/bi";
@@ -14,8 +15,8 @@ import { CgProfile } from "react-icons/cg";
 import DropDown from "./DropDown";
 import Navbar from "./Navbar";
 import { useSelector } from "react-redux";
-import Cart from "../Cart/Cart";
 import Wishlist from "../Whislist/Whislist";
+import NotificationComponent from "../Notification/NotificationComponent";
 import { RxCross1 } from "react-icons/rx";
 import { backend_url } from "../../server";
 
@@ -29,7 +30,6 @@ const Header = ({ activeHeading }) => {
   const [searchData, setSearchData] = useState(null);
   const [active, setActive] = useState(false);
   const [dropDown, setDropDown] = useState(false);
-  const [openCart, setOpenCart] = useState(false);
   const [openWishlist, setOpenWishlist] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -37,21 +37,64 @@ const Header = ({ activeHeading }) => {
     const term = e.target.value;
     setSearchTerm(term);
 
+    if (!term) {
+      setSearchData(null);
+      return;
+    }
+
     const filteredProducts =
       allProducts &&
       allProducts.filter((product) =>
         product.name.toLowerCase().includes(term.toLowerCase())
       );
-    setSearchData(filteredProducts);
+    
+    // Sort by name length (shorter names first) for better relevance
+    if (filteredProducts && filteredProducts.length > 0) {
+      const sortedProducts = [...filteredProducts].sort((a, b) => {
+        // Calculate relevance: shorter names that match earlier are better
+        const aIndex = a.name.toLowerCase().indexOf(term.toLowerCase());
+        const bIndex = b.name.toLowerCase().indexOf(term.toLowerCase());
+        
+        // If both start with the term, sort by length
+        if (aIndex === 0 && bIndex === 0) {
+          return a.name.length - b.name.length;
+        }
+        // If one starts with term, prioritize it
+        if (aIndex === 0) return -1;
+        if (bIndex === 0) return 1;
+        // Otherwise sort by length
+        return a.name.length - b.name.length;
+      });
+      setSearchData(sortedProducts);
+    } else {
+      setSearchData(null);
+    }
   };
 
-  window.addEventListener("scroll", () => {
-    if (window.scrollY > 70) {
-      setActive(true);
-    } else {
-      setActive(false);
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 70) {
+        setActive(true);
+      } else {
+        setActive(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    
+    // Cleanup: restore body scroll when component unmounts
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      document.body.style.overflow = 'auto';
+    };
+  }, []);
+
+  // Cleanup body scroll when search term is cleared
+  useEffect(() => {
+    if (!searchTerm) {
+      document.body.style.overflow = 'auto';
     }
-  });
+  }, [searchTerm]);
 
   return (
     <>
@@ -67,38 +110,71 @@ const Header = ({ activeHeading }) => {
             </Link>
           </div>
           {/* search box */}
-          <div className="w-[50%] relative">
+          <div className="w-[50%] relative z-50">
             <input
               type="text"
               placeholder="Tìm kiếm sản phẩm..."
               value={searchTerm}
               onChange={handleSearchChange}
-              className="h-[45px] w-full px-4 pr-12 border-2 border-blue-300 focus:border-blue-500 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+              className="h-[45px] w-full px-4 pr-12 border-2 border-blue-300 focus:border-blue-500 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all relative z-50"
             />
             <AiOutlineSearch
               size={24}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-blue-500 hover:text-blue-600 transition-colors"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-blue-500 hover:text-blue-600 transition-colors z-50"
             />
            {searchTerm && searchData && searchData.length !== 0 ? (
-              <div className="absolute min-h-[30vh] max-h-[60vh] overflow-y-auto bg-white rounded-lg shadow-xl border border-gray-200 z-[9] p-4 mt-2 w-full">
-                {searchData &&
-                  searchData.slice(0, 10).map((i, index) => {
-                    return (
-                      <Link key={i._id || index} to={`/product/${i._id}`}>
-                        <div className="w-full flex items-center p-3 hover:bg-blue-50 rounded-lg transition-colors mb-2">
-                          <img
-                            src={`${backend_url}${i.images[0]}`}
-                            alt={i.name}
-                            className="w-12 h-12 object-cover rounded-md mr-3"
-                            onError={(e) => {
-                              e.target.src = "https://via.placeholder.com/50";
-                            }}
-                          />
-                          <h1 className="text-gray-800 font-medium">{i.name}</h1>
-                        </div>
-                      </Link>
-                    );
-                  })}
+              <div 
+                className="absolute min-h-[200px] max-h-[60vh] overflow-y-auto bg-white rounded-lg shadow-2xl border border-gray-200 z-[9999] p-4 mt-2 w-full"
+                onMouseEnter={(e) => {
+                  // Prevent body scroll when hovering over dropdown
+                  document.body.style.overflow = 'hidden';
+                }}
+                onMouseLeave={(e) => {
+                  // Restore body scroll when leaving dropdown
+                  document.body.style.overflow = 'auto';
+                }}
+                style={{
+                  scrollbarWidth: 'thin',
+                  scrollbarColor: '#cbd5e0 #f7fafc'
+                }}
+              >
+                <div className="space-y-1">
+                  {searchData &&
+                    searchData.slice(0, 50).map((i, index) => {
+                      return (
+                        <Link 
+                          key={i._id || index} 
+                          to={`/product/${i._id}`}
+                          onClick={() => {
+                            setSearchTerm("");
+                            setSearchData(null);
+                            document.body.style.overflow = 'auto';
+                          }}
+                        >
+                          <div className="w-full flex items-center p-3 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer">
+                            <img
+                              src={`${backend_url}${i.images && i.images[0]}`}
+                              alt={i.name}
+                              className="w-12 h-12 object-cover rounded-md mr-3 flex-shrink-0"
+                              onError={(e) => {
+                                e.target.src = "https://via.placeholder.com/50";
+                              }}
+                            />
+                            <h1 className="text-gray-800 font-medium text-sm truncate">{i.name}</h1>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                </div>
+                {searchData && searchData.length > 50 && (
+                  <div className="text-center text-xs text-gray-500 mt-2 pt-2 border-t border-gray-200">
+                    Hiển thị 50/{searchData.length} kết quả
+                  </div>
+                )}
+              </div>
+            ) : searchTerm && searchData && searchData.length === 0 ? (
+              <div className="absolute bg-white rounded-lg shadow-2xl border border-gray-200 z-[9999] p-4 mt-2 w-full">
+                <p className="text-gray-500 text-sm text-center py-4">Không tìm thấy sản phẩm nào</p>
               </div>
             ) : null}
           </div>
@@ -115,7 +191,7 @@ const Header = ({ activeHeading }) => {
 
           <Link to={`${isSeller ? "/dashboard" : "/shop-login"}`}>
             <button className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 ease-in-out flex items-center justify-center gap-2 whitespace-nowrap">
-              <span>{isSeller ? "Về trang bán hàng" : "Bán Hàng"}</span>
+              <span>{isSeller ? "Trang quản lý" : "Bán Hàng"}</span>
               <IoIosArrowForward size={18} />
             </button>
           </Link>
@@ -169,19 +245,26 @@ const Header = ({ activeHeading }) => {
               </div>
             </div>
 
-            <div className={`${styles.noramlFlex}`}>
-              <div
-                className="relative cursor-pointer mr-[15px] group"
-                onClick={() => setOpenCart(true)}
-              >
-                <AiOutlineShoppingCart
-                  size={30}
-                  className="text-white/90 group-hover:text-white transition-colors"
-                />
-                <span className="absolute -right-1 -top-1 rounded-full bg-gradient-to-r from-orange-500 to-red-500 w-5 h-5 p-0 m-0 text-white font-bold text-[11px] leading-tight text-center flex items-center justify-center shadow-lg">
-                  {cart && cart.length}
-                </span>
+            {isAuthenticated && (
+              <div className={`${styles.noramlFlex}`}>
+                <NotificationComponent />
               </div>
+            )}
+
+            <div className={`${styles.noramlFlex}`}>
+              <Link to="/cart">
+                <div
+                  className="relative cursor-pointer mr-[15px] group"
+                >
+                  <AiOutlineShoppingCart
+                    size={30}
+                    className="text-white/90 group-hover:text-white transition-colors"
+                  />
+                  <span className="absolute -right-1 -top-1 rounded-full bg-gradient-to-r from-orange-500 to-red-500 w-5 h-5 p-0 m-0 text-white font-bold text-[11px] leading-tight text-center flex items-center justify-center shadow-lg">
+                    {cart && cart.length}
+                  </span>
+                </div>
+              </Link>
             </div>
 
             <div className={`${styles.noramlFlex}`}>
@@ -201,9 +284,6 @@ const Header = ({ activeHeading }) => {
                 )}
               </div>
             </div>
-
-            {/* cart popup */}
-            {openCart ? <Cart setOpenCart={setOpenCart} /> : null}
 
             {/* wishlist popup */}
             {openWishlist ? (
@@ -238,18 +318,17 @@ const Header = ({ activeHeading }) => {
             </Link>
           </div>
           <div>
-            <div
-              className="relative mr-[20px]"
-              onClick={() => setOpenCart(true)}
-            >
-              <AiOutlineShoppingCart size={30} />
-              <span class="absolute right-0 top-0 rounded-full bg-[#3bc177] w-4 h-4 top right p-0 m-0 text-white font-mono text-[12px]  leading-tight text-center">
-                {cart && cart.length}
-              </span>
-            </div>
+            <Link to="/cart">
+              <div
+                className="relative mr-[20px]"
+              >
+                <AiOutlineShoppingCart size={30} />
+                <span class="absolute right-0 top-0 rounded-full bg-[#3bc177] w-4 h-4 top right p-0 m-0 text-white font-mono text-[12px]  leading-tight text-center">
+                  {cart && cart.length}
+                </span>
+              </div>
+            </Link>
           </div>
-          {/* cart popup */}
-          {openCart ? <Cart setOpenCart={setOpenCart} /> : null}
 
           {/* wishlist popup */}
           {openWishlist ? <Wishlist setOpenWishlist={setOpenWishlist} /> : null}

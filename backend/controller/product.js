@@ -266,13 +266,36 @@ router.get(
 );
 
 
+// upload review images
+router.post(
+  "/upload-review-images",
+  isAuthenticated,
+  upload.array("images"),
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      if (!req.files || req.files.length === 0) {
+        return next(new ErrorHandler("Không có ảnh nào được upload", 400));
+      }
+      const files = req.files;
+      const imageUrls = files.map((file) => `${file.filename}`);
+      res.status(200).json({
+        success: true,
+        images: imageUrls,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error, 400));
+    }
+  })
+);
+
 // review for a product
 router.put(
   "/create-new-review",
   isAuthenticated,
   catchAsyncErrors(async (req, res, next) => {
     try {
-      const { user, rating,comment, productId} = req.body;
+      const { user, rating, comment, productId, reviewImages, orderId } = req.body;
+      const Order = require("../model/order");
 
       const product = await Product.findById(productId);
 
@@ -281,6 +304,7 @@ router.put(
         rating,
         comment,
         productId,
+        reviewImages: reviewImages || [],
       };
 
       const isReviewed = product.reviews.find(
@@ -290,7 +314,12 @@ router.put(
       if (isReviewed) {
         product.reviews.forEach((rev) => {
           if (rev.user._id === req.user._id) {
-            (rev.rating = rating), (rev.comment = comment), (rev.user = user);
+            rev.rating = rating;
+            rev.comment = comment;
+            rev.user = user;
+            if (reviewImages) {
+              rev.reviewImages = reviewImages;
+            }
           }
         });
       } else {
@@ -307,7 +336,37 @@ router.put(
 
       await product.save({ validateBeforeSave: false });
 
-   
+      // Update order item isReviewed status
+      if (orderId) {
+        const order = await Order.findById(orderId);
+        if (order) {
+          let found = false;
+          const prodId = productId?.toString() || productId;
+          
+          for (let i = 0; i < order.cart.length; i++) {
+            const item = order.cart[i];
+            // Compare both as strings to handle ObjectId comparison
+            // Try multiple ways to match the product
+            const itemId = item._id?.toString() || item._id;
+            const itemProductId = item.productId?.toString() || item.productId;
+            
+            // Check if this item matches the product being reviewed
+            if (itemId === prodId || itemProductId === prodId) {
+              // Directly modify the item in the array
+              order.cart[i].isReviewed = true;
+              found = true;
+              break; // Found the item, no need to continue
+            }
+          }
+          
+          if (found) {
+            // Mark the cart array as modified
+            order.markModified('cart');
+            await order.save({ validateBeforeSave: false });
+          }
+        }
+      }
+
       res.status(200).json({
         success: true,
         message: "Đánh giá thành công!",
@@ -360,6 +419,20 @@ router.put(
       review.shopFeedbackDate = Date.now();
 
       await product.save({ validateBeforeSave: false });
+
+      // Create notification for user about shop feedback
+      try {
+        const Notification = require("../model/notification");
+        await Notification.create({
+          userId: review.user._id || userId,
+          type: "review_feedback",
+          title: "Shop đã phản hồi đánh giá của bạn",
+          message: `Shop đã phản hồi đánh giá của bạn về sản phẩm ${product.name}`,
+          link: `/product/${productId}`,
+        });
+      } catch (notifError) {
+        console.error("Error creating notification:", notifError);
+      }
 
       res.status(200).json({
         success: true,
