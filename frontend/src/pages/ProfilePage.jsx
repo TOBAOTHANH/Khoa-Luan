@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import Header from "../components/Layout/Header";
 import styles from "../styles/styles";
 import Loader from "../components/Layout/Loader";
@@ -8,20 +9,30 @@ import { useSelector } from "react-redux";
 
 const ProfilePage = () => {
   const { loading } = useSelector((state) => state.user);
+  const [searchParams] = useSearchParams();
   const [active, setActive] = useState(1);
 
+  useEffect(() => {
+    const activeParam = searchParams.get('active');
+    if (activeParam) {
+      setActive(parseInt(activeParam));
+    }
+  }, [searchParams]);
+
   return (
-    <div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
       {loading ? (
         <Loader />
       ) : (
         <>
           <Header />
-          <div className={`${styles.section} flex bg-[#f5f5f5] py-10`}>
-            <div className="w-[50px] 800px:w-[335px] sticky 800px:mt-0 mt-[18%]">
+          <div className={`${styles.section} flex items-start gap-6 py-8 px-4`}>
+            <div className="w-[80px] 800px:w-[280px] sticky top-20">
               <ProfileSideBar active={active} setActive={setActive} />
             </div>
-            <ProfileContent active={active} />
+            <div className="flex-1">
+              <ProfileContent active={active} />
+            </div>
           </div>
         </>
       )}

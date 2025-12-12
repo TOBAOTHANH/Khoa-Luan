@@ -453,12 +453,24 @@ const UserOrderDetails = () => {
       {/* Action Buttons */}
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex flex-col md:flex-row gap-4">
-          <Link to="/" className="flex-1">
-            <button className="w-full bg-gradient-to-r from-[#6443d1] to-[#7c5dd8] hover:from-[#5335b0] hover:to-[#6443d1] text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 ease-in-out flex items-center justify-center gap-2">
-              <AiOutlineMessage size={18} />
-              <span>Gửi tin nhắn cho shop</span>
-            </button>
-          </Link>
+          {data?.cart && data.cart.length > 0 && data.cart[0]?.shopId ? (
+            <Link 
+              to={`/profile?active=4&shopId=${data.cart[0].shopId}`} 
+              className="flex-1"
+            >
+              <button className="w-full bg-gradient-to-r from-[#6443d1] to-[#7c5dd8] hover:from-[#5335b0] hover:to-[#6443d1] text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 ease-in-out flex items-center justify-center gap-2">
+                <AiOutlineMessage size={18} />
+                <span>Gửi tin nhắn cho shop</span>
+              </button>
+            </Link>
+          ) : (
+            <Link to="/profile?active=4" className="flex-1">
+              <button className="w-full bg-gradient-to-r from-[#6443d1] to-[#7c5dd8] hover:from-[#5335b0] hover:to-[#6443d1] text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 ease-in-out flex items-center justify-center gap-2">
+                <AiOutlineMessage size={18} />
+                <span>Gửi tin nhắn cho shop</span>
+              </button>
+            </Link>
+          )}
         </div>
       </div>
     </div>

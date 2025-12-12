@@ -72,8 +72,13 @@ const AllReviews = () => {
       {isLoading ? (
         <Loader />
       ) : (
-        <div className="w-full mx-8 pt-1 mt-10 bg-white rounded-lg shadow-lg p-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Phản Hồi Đánh Giá</h2>
+        <div className="w-full mx-8 pt-1 mt-10 bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-xl p-6 border border-gray-100">
+          <div className="mb-6">
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent mb-2">
+              Phản Hồi Đánh Giá
+            </h2>
+            <p className="text-gray-600">Tổng số đánh giá: {reviews?.length || 0}</p>
+          </div>
           
           {/* Tabs */}
           <div className="flex flex-wrap gap-2 mb-6 border-b border-gray-200 pb-4">
@@ -126,7 +131,7 @@ const AllReviews = () => {
               displayReviews.map((review, index) => (
                 <div
                   key={review._id || index}
-                  className="bg-gradient-to-r from-gray-50 to-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-6 border-l-4 border-blue-500"
+                  className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border-l-4 border-violet-500 hover:border-violet-600"
                 >
                   <div className="flex items-start space-x-4">
                     {/* Product Image */}

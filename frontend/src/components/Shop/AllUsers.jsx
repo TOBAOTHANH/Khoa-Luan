@@ -101,7 +101,13 @@ const AllUsers = () => {
                 key={user._id}
                 className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group"
               >
-                <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-4">
+                <div className={`p-4 ${
+                  user.role === 'Admin' 
+                    ? 'bg-gradient-to-r from-purple-500 to-purple-600'
+                    : user.role === 'Seller'
+                    ? 'bg-gradient-to-r from-orange-500 to-orange-600'
+                    : 'bg-gradient-to-r from-blue-500 to-blue-600'
+                }`}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="bg-white/20 backdrop-blur-sm p-2 rounded-full">

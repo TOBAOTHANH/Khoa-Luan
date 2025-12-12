@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { backend_url, server } from "../../server";
 import { useDispatch, useSelector } from "react-redux";
 import { getOrderStatusInVietnamese } from "../../utils/orderStatus";
@@ -8,6 +8,7 @@ import {
   AiOutlineDelete,
   AiOutlineEye,
   AiOutlineEyeInvisible,
+  AiOutlineSend,
 } from "react-icons/ai";
 import {
   MdOutlineAdminPanelSettings,
@@ -23,6 +24,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import { Button } from "@mui/material";
 import { Link } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
+import { TfiGallery } from "react-icons/tfi";
 import {
   deleteUserAddress,
   loadUser,
@@ -32,6 +34,14 @@ import {
 } from "../../redux/actions/user";
 import axios from "axios";
 import { getAllOrdersOfUser } from "../../redux/actions/order";
+import socketIO from "socket.io-client";
+import { format } from "timeago.js";
+import ImageModal from "../Common/ImageModal";
+import ProfileInbox from "./ProfileInbox";
+import { useNavigate } from "react-router-dom";
+
+const ENDPOINT = "http://localhost:4000/";
+const socketId = socketIO(ENDPOINT, { transports: ["websocket"] });
 
 const ProfileContent = ({ active }) => {
   const { user, error, successMessage } = useSelector((state) => state.user);
@@ -41,6 +51,21 @@ const ProfileContent = ({ active }) => {
   const [password, setPassword] = useState("");
   const [avatar, setAvatar] = useState(null);
   const dispatch = useDispatch();
+  
+  // Inbox states
+  const [conversations, setConversations] = useState([]);
+  const [arrivalMessage, setArrivalMessage] = useState(null);
+  const [currentChat, setCurrentChat] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [userData, setUserData] = useState(null);
+  const [onlineUsers, setOnlineUsers] = useState([]);
+  const [images, setImages] = useState();
+  const [activeStatus, setActiveStatus] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const scrollRef = useRef(null);
 
   useEffect(() => {
     if (error) {
@@ -207,6 +232,12 @@ const ProfileContent = ({ active }) => {
       {active === 7 && (
         <div>
           <Address />
+        </div>
+      )}
+      {/* Inbox */}
+      {active === 4 && (
+        <div>
+          <ProfileInbox user={user} />
         </div>
       )}
     </div>

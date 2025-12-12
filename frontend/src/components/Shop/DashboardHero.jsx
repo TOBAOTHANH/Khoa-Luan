@@ -58,14 +58,13 @@ const DashboardHero = () => {
     };
   }, [orders, timeFilter]);
 
-  // Tính số dư giống như doanh thu sau phí (từ tất cả đơn hàng đã giao)
+  // Sử dụng availableBalance từ shop để đồng bộ với trang rút tiền
   const calculatedBalance = useMemo(() => {
-    const allDeliveredOrders = orders.filter(order => order.status === 'Delivered');
-    const totalRevenue = allDeliveredOrders.reduce((sum, order) => sum + (order.totalPrice || 0), 0);
-    const serviceCharge = totalRevenue * 0.1;
-    const netRevenue = totalRevenue - serviceCharge;
-    return netRevenue.toFixed(2);
-  }, [orders]);
+    if (seller?.availableBalance !== undefined && seller?.availableBalance !== null) {
+      return parseFloat(seller.availableBalance.toFixed(2));
+    }
+    return 0;
+  }, [seller?.availableBalance]);
 
   // Print invoice function
   const printInvoice = (orderId) => {

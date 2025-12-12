@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styles from "../../styles/styles";
 import { categoriesData } from "../../static/data";
 import {
@@ -28,17 +28,66 @@ const Header = ({ activeHeading }) => {
   const { allProducts } = useSelector((state) => state.products);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchData, setSearchData] = useState(null);
+  const [searchHistory, setSearchHistory] = useState([]);
+  const [searchKeywordsHistory, setSearchKeywordsHistory] = useState([]);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [active, setActive] = useState(false);
   const [dropDown, setDropDown] = useState(false);
   const [openWishlist, setOpenWishlist] = useState(false);
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+
+  // Load search history from localStorage
+  useEffect(() => {
+    const savedHistory = localStorage.getItem('searchHistory');
+    if (savedHistory) {
+      try {
+        const history = JSON.parse(savedHistory);
+        setSearchHistory(history);
+      } catch (error) {
+        console.error('Error loading search history:', error);
+      }
+    }
+    
+    // Load search keywords history
+    const savedKeywords = localStorage.getItem('searchKeywordsHistory');
+    if (savedKeywords) {
+      try {
+        const keywords = JSON.parse(savedKeywords);
+        setSearchKeywordsHistory(keywords);
+      } catch (error) {
+        console.error('Error loading search keywords history:', error);
+      }
+    }
+  }, []);
+
+  // Get products from history IDs
+  const getHistoryProducts = () => {
+    if (!searchHistory || searchHistory.length === 0 || !allProducts) return [];
+    
+    const historyProducts = searchHistory
+      .map(productId => allProducts.find(p => p._id === productId))
+      .filter(p => p !== undefined); // Remove undefined products
+    
+    return historyProducts;
+  };
 
   const handleSearchChange = (e) => {
     const term = e.target.value;
     setSearchTerm(term);
 
     if (!term) {
-      setSearchData(null);
+      // Nếu không có từ khóa và đang focus, hiển thị lịch sử tìm kiếm
+      if (isSearchFocused) {
+        const historyProducts = getHistoryProducts();
+        if (historyProducts.length > 0) {
+          setSearchData(historyProducts);
+        } else {
+          setSearchData(null);
+        }
+      } else {
+        setSearchData(null);
+      }
       return;
     }
 
@@ -69,6 +118,89 @@ const Header = ({ activeHeading }) => {
     } else {
       setSearchData(null);
     }
+  };
+
+  const handleSearchFocus = () => {
+    setIsSearchFocused(true);
+    // Khi focus và không có từ khóa, hiển thị lịch sử tìm kiếm
+    if (!searchTerm) {
+      const historyProducts = getHistoryProducts();
+      if (historyProducts.length > 0) {
+        setSearchData(historyProducts);
+      }
+    }
+  };
+
+  const handleSearchBlur = () => {
+    // Delay để cho phép click vào link
+    setTimeout(() => {
+      setIsSearchFocused(false);
+      if (!searchTerm) {
+        setSearchData(null);
+      }
+    }, 200);
+  };
+
+  // Save product to search history
+  const addToSearchHistory = (productId) => {
+    if (!productId) return;
+    
+    let updatedHistory = [...searchHistory];
+    
+    // Remove if already exists
+    updatedHistory = updatedHistory.filter(id => id !== productId);
+    
+    // Add to beginning
+    updatedHistory.unshift(productId);
+    
+    // Limit to 20 most recent
+    updatedHistory = updatedHistory.slice(0, 20);
+    
+    setSearchHistory(updatedHistory);
+    localStorage.setItem('searchHistory', JSON.stringify(updatedHistory));
+  };
+
+  // Save search keyword to history
+  const addToSearchKeywordsHistory = (keyword) => {
+    if (!keyword || keyword.trim() === '') return;
+    
+    const trimmedKeyword = keyword.trim().toLowerCase();
+    let updatedKeywords = [...searchKeywordsHistory];
+    
+    // Remove if already exists
+    updatedKeywords = updatedKeywords.filter(k => k !== trimmedKeyword);
+    
+    // Add to beginning
+    updatedKeywords.unshift(trimmedKeyword);
+    
+    // Limit to 20 most recent
+    updatedKeywords = updatedKeywords.slice(0, 20);
+    
+    setSearchKeywordsHistory(updatedKeywords);
+    localStorage.setItem('searchKeywordsHistory', JSON.stringify(updatedKeywords));
+  };
+
+  // Handle search submit (Enter key or search button click)
+  const handleSearchSubmit = (e) => {
+    if (e) {
+      e.preventDefault();
+    }
+    
+    if (!searchTerm || searchTerm.trim() === '') {
+      return;
+    }
+    
+    // Save search keyword to history
+    addToSearchKeywordsHistory(searchTerm);
+    
+    // Navigate to products page with search query
+    navigate(`/products?search=${encodeURIComponent(searchTerm.trim())}`);
+    
+    // Clear search
+    setSearchTerm("");
+    setSearchData(null);
+    setIsSearchFocused(false);
+    document.body.style.overflow = 'auto';
   };
 
   useEffect(() => {
@@ -111,18 +243,30 @@ const Header = ({ activeHeading }) => {
           </div>
           {/* search box */}
           <div className="w-[50%] relative z-50">
-            <input
-              type="text"
-              placeholder="Tìm kiếm sản phẩm..."
-              value={searchTerm}
-              onChange={handleSearchChange}
-              className="h-[45px] w-full px-4 pr-12 border-2 border-blue-300 focus:border-blue-500 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all relative z-50"
-            />
-            <AiOutlineSearch
-              size={24}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-blue-500 hover:text-blue-600 transition-colors z-50"
-            />
-           {searchTerm && searchData && searchData.length !== 0 ? (
+            <form onSubmit={handleSearchSubmit}>
+              <input
+                type="text"
+                placeholder="Tìm kiếm sản phẩm..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+                onFocus={handleSearchFocus}
+                onBlur={handleSearchBlur}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSearchSubmit(e);
+                  }
+                }}
+                className="h-[45px] w-full px-4 pr-12 border-2 border-blue-300 focus:border-blue-500 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all relative z-50"
+              />
+              <button
+                type="submit"
+                onClick={handleSearchSubmit}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-blue-500 hover:text-blue-600 transition-colors z-50"
+              >
+                <AiOutlineSearch size={24} />
+              </button>
+            </form>
+           {((isSearchFocused && searchData && searchData.length > 0) || (searchTerm && searchData && searchData.length > 0)) ? (
               <div 
                 className="absolute min-h-[200px] max-h-[60vh] overflow-y-auto bg-white rounded-lg shadow-2xl border border-gray-200 z-[9999] p-4 mt-2 w-full"
                 onMouseEnter={(e) => {
@@ -138,16 +282,25 @@ const Header = ({ activeHeading }) => {
                   scrollbarColor: '#cbd5e0 #f7fafc'
                 }}
               >
+                {!searchTerm && searchData && searchData.length > 0 && (
+                  <div className="mb-3 pb-3 border-b border-gray-200">
+                    <p className="text-sm font-semibold text-gray-700">Tìm kiếm gần đây</p>
+                    <p className="text-xs text-gray-500">Các sản phẩm bạn đã xem</p>
+                  </div>
+                )}
                 <div className="space-y-1">
                   {searchData &&
-                    searchData.slice(0, 50).map((i, index) => {
+                    searchData.slice(0, searchTerm ? 50 : 20).map((i, index) => {
                       return (
                         <Link 
                           key={i._id || index} 
                           to={`/product/${i._id}`}
                           onClick={() => {
+                            // Lưu vào lịch sử tìm kiếm
+                            addToSearchHistory(i._id);
                             setSearchTerm("");
                             setSearchData(null);
+                            setIsSearchFocused(false);
                             document.body.style.overflow = 'auto';
                           }}
                         >
@@ -360,28 +513,45 @@ const Header = ({ activeHeading }) => {
               </div>
 
               <div className="my-8 w-[92%] m-auto h-[40px relative]">
-                <input
-                  type="search"
-                  placeholder="Search Product..."
-                  className="h-[40px] w-full px-2 border-[#3957db] border-[2px] rounded-md"
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                />
-                {searchData && (
-                  <div className="absolute bg-[#fff] z-10 shadow w-full left-0 p-3">
-                    {searchData.map((i) => {
-                      const d = i.name;
-
-                      const Product_name = d.replace(/\s+/g, "-");
+                <form onSubmit={handleSearchSubmit}>
+                  <input
+                    type="search"
+                    placeholder="Tìm kiếm sản phẩm..."
+                    className="h-[40px] w-full px-2 border-[#3957db] border-[2px] rounded-md"
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleSearchSubmit(e);
+                        setOpen(false); // Close mobile menu after search
+                      }
+                    }}
+                  />
+                </form>
+                {searchData && searchData.length > 0 && (
+                  <div className="absolute bg-[#fff] z-10 shadow w-full left-0 p-3 max-h-[300px] overflow-y-auto">
+                    {searchData.slice(0, 10).map((i, index) => {
                       return (
-                        <Link to={`/product/${Product_name}`}>
-                          <div className="flex items-center">
+                        <Link 
+                          key={i._id || index}
+                          to={`/product/${i._id}`}
+                          onClick={() => {
+                            addToSearchHistory(i._id);
+                            setSearchTerm("");
+                            setSearchData(null);
+                            setOpen(false);
+                          }}
+                        >
+                          <div className="flex items-center p-2 hover:bg-gray-100 rounded">
                             <img
-                              src={i.image_Url[0]?.url}
+                              src={`${backend_url}${i.images && i.images[0]}`}
                               alt=""
-                              className="w-[50px] mr-2"
+                              className="w-[50px] h-[50px] object-cover mr-2 rounded"
+                              onError={(e) => {
+                                e.target.src = "https://via.placeholder.com/50";
+                              }}
                             />
-                            <h5>{i.name}</h5>
+                            <h5 className="text-sm">{i.name}</h5>
                           </div>
                         </Link>
                       );

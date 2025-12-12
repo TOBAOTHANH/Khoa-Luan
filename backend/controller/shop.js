@@ -77,70 +77,6 @@ router.post('/create-shop', upload.single('file'), async (req, res, next) => {
   }
 });
 
-// router.post("/create-shop", upload.single("file"), async (req, res, next) => {
-//     try{
-//          const{email} = req.body;
-//          const sellerEmail = await Shop.findOne({email});
-//          if (sellerEmail) {
-//             const filename = req.file.filename;
-//             const filePath = `uploads/${filename}`;
-//             fs.unlink(filePath, (err) => {
-//               if (err) {
-//                 console.log(err);
-//                 return res.status(500).json({ message: "Error deleting file" });
-//               }
-//             });
-//             return next(new ErrorHandler("User already exists", 400));
-//           }
-//            // Kiểm tra nếu địa chỉ chưa được cung cấp
-//         if (!address) {
-//           return res.status(400).json({ message: "Địa chỉ không được xác định" });
-//       }
-//     // Chuyển đổi địa chỉ thành chuỗi nếu nó là mảng
-//     let shopAddress = address;
-//     if (Array.isArray(shopAddress)) {
-//         shopAddress = shopAddress.join(", "); // Nối các phần tử của mảng thành một chuỗi
-//     }
-//           // If email doesn't exist, create a new user
-//     const filename = req.file.filename;
-//     const fileUrl = path.join("/uploads", filename);
-
-//     const public_id = filename;
-
-//     const seller = {
-//       name: req.body.name,
-//       email: email,
-//       password: req.body.password,
-//       avatar: {
-//         url: fileUrl,
-//         public_id,
-//       },
-//       address: shopAddress,
-//       phoneNumber: req.body.phoneNumber,
-//         zipCode: req.body.zipCode,
-//     };
-//     const activationToken = createActivationToken(seller);
-
-//     const activationUrl = `http://localhost:3000/seller/activation/${activationToken}`;
-
-//      try {
-//       await sendMail({
-//         email: seller.email,
-//         subject: "Activate your account",
-//         message: `Hello ${seller.name}, please click on the link to activate your shop: ${activationUrl}`,
-//       });
-//       res.status(201).json({
-//         success: true,
-//         message: `please check your email:- ${seller.email} to activate your shop !`,
-//       });
-//     } catch (error) {
-//       return next(new ErrorHandler(error.message, 500));
-//     }
-
-//     }catch(error){
-//         return next(new ErrorHandler(error.message, 400));
-//     }
-// });
 
 // create activation token
 const createActivationToken = (seller) => {
@@ -435,6 +371,72 @@ router.delete(
       res.status(201).json({
         success: true,
         seller,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
+// Recalculate available balance based on actual delivered orders and withdrawals
+router.post(
+  '/recalculate-balance',
+  isSeller,
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const Order = require('../model/order');
+      const Withdraw = require('../model/withdraw');
+      
+      const seller = await Shop.findById(req.seller._id);
+      
+      if (!seller) {
+        return next(new ErrorHandler('Không tìm thấy người bán với id này', 400));
+      }
+
+      // Tính tổng doanh thu từ các orders đã delivered
+      const deliveredOrders = await Order.find({
+        'cart.shopId': seller._id.toString(),
+        status: 'Delivered'
+      });
+
+      let totalRevenue = 0;
+      deliveredOrders.forEach(order => {
+        totalRevenue += order.totalPrice || 0;
+      });
+
+      // Tính phí dịch vụ (10%)
+      const serviceCharge = totalRevenue * 0.1;
+      const netRevenue = totalRevenue - serviceCharge;
+
+      // Tính tổng số tiền đã rút
+      const withdrawals = await Withdraw.find({
+        'seller._id': seller._id.toString()
+      });
+
+      let totalWithdrawn = 0;
+      withdrawals.forEach(withdraw => {
+        totalWithdrawn += withdraw.amount || 0;
+      });
+
+      // Tính lại số dư = doanh thu ròng - số tiền đã rút
+      const recalculatedBalance = netRevenue - totalWithdrawn;
+
+      // Cập nhật số dư
+      seller.availableBalance = Math.max(0, recalculatedBalance); // Đảm bảo không âm
+      await seller.save();
+
+      res.status(200).json({
+        success: true,
+        message: 'Đã tính lại số dư thành công',
+        data: {
+          totalRevenue: totalRevenue.toFixed(2),
+          serviceCharge: serviceCharge.toFixed(2),
+          netRevenue: netRevenue.toFixed(2),
+          totalWithdrawn: totalWithdrawn.toFixed(2),
+          recalculatedBalance: seller.availableBalance.toFixed(2),
+          oldBalance: (seller.availableBalance - (recalculatedBalance - (seller.availableBalance || 0))).toFixed(2)
+        },
+        seller
       });
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));

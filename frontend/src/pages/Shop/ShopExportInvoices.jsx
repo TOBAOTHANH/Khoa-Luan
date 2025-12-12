@@ -241,9 +241,10 @@ const ShopExportInvoices = () => {
     <div>
       <DashboardHeader />
       <div className="flex items-start justify-between w-full">
-        <div className="w-[80px] 800px:w-[330px]">
-          <DashboardSideBar active={14} />
+        <div className="w-[80px] 800px:w-[330px] flex-shrink-0">
+          {/* Sidebar is fixed, this div is just for spacing */}
         </div>
+        <DashboardSideBar active={14} />
         <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 p-4 md:p-8">
           <div className="max-w-6xl mx-auto">
             {/* Header Section */}
