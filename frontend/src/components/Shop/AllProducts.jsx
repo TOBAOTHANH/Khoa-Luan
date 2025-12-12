@@ -1,7 +1,7 @@
 import { Button } from '@mui/material';
 import { DataGrid } from "@mui/x-data-grid";
 import React, { useEffect, useState, useMemo } from "react";
-import { AiOutlineDelete, AiOutlineEye, AiOutlineEdit, AiOutlinePlus } from "react-icons/ai";
+import { AiOutlineDelete, AiOutlineEye, AiOutlineEdit, AiOutlinePlus, AiOutlineSearch } from "react-icons/ai";
 import { FiPackage, FiTrendingUp, FiAlertCircle, FiCheckCircle } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
@@ -12,14 +12,17 @@ import { backend_url } from "../../server";
 import { toast } from "react-toastify";
 
 const AllProducts = () => {
-  const { products, isLoading } = useSelector((state) => state.products);
-  const { seller } = useSelector((state) => state.seller);
+  const { products = [], isLoading } = useSelector((state) => state.products || {});
+  const { seller } = useSelector((state) => state.seller || {});
   const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    dispatch(getAllProductsShop(seller._id));
-  }, [dispatch]);
+    if (seller?._id) {
+      dispatch(getAllProductsShop(seller._id));
+    }
+  }, [dispatch, seller?._id]);
 
   const handleDelete = (id) => {
     if (window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
@@ -31,21 +34,67 @@ const AllProducts = () => {
     }
   };
 
-  // Categorize products by status
+  // Filter products by search query
+  const filteredProducts = useMemo(() => {
+    if (!products || !Array.isArray(products)) {
+      return [];
+    }
+    
+    if (!searchQuery.trim()) {
+      return products;
+    }
+    
+    const query = searchQuery.toLowerCase().trim();
+    return products.filter(product => {
+      if (!product) return false;
+      
+      // Tìm kiếm theo tên sản phẩm
+      const nameMatch = product.name?.toLowerCase().includes(query);
+      
+      // Tìm kiếm theo ID sản phẩm
+      const idMatch = product._id?.toLowerCase().includes(query);
+      
+      // Tìm kiếm theo giá (chuyển đổi số thành chuỗi để tìm)
+      const priceMatch = product.discountPrice?.toString().includes(query) || 
+                        product.originalPrice?.toString().includes(query);
+      
+      // Tìm kiếm theo category
+      const categoryMatch = product.category?.toLowerCase().includes(query);
+      
+      // Tìm kiếm theo tags (nếu có và là array)
+      const tagsMatch = Array.isArray(product.tags) && product.tags.some(tag => 
+        tag?.toLowerCase().includes(query)
+      );
+      
+      return nameMatch || idMatch || priceMatch || categoryMatch || tagsMatch;
+    });
+  }, [products, searchQuery]);
+
+  // Categorize products by status (sau khi filter)
   const categorizedProducts = useMemo(() => {
-    const inStock = products.filter(item => item.stock > 0);
-    const outOfStock = products.filter(item => item.stock === 0);
-    const lowStock = products.filter(item => item.stock > 0 && item.stock <= 10);
-    const bestSelling = products.filter(item => item.sold_out > 0).sort((a, b) => (b.sold_out || 0) - (a.sold_out || 0));
+    if (!filteredProducts || !Array.isArray(filteredProducts)) {
+      return {
+        all: [],
+        inStock: [],
+        outOfStock: [],
+        lowStock: [],
+        bestSelling: []
+      };
+    }
+    
+    const inStock = filteredProducts.filter(item => item && item.stock > 0);
+    const outOfStock = filteredProducts.filter(item => item && item.stock === 0);
+    const lowStock = filteredProducts.filter(item => item && item.stock > 0 && item.stock <= 10);
+    const bestSelling = filteredProducts.filter(item => item && item.sold_out > 0).sort((a, b) => (b.sold_out || 0) - (a.sold_out || 0));
     
     return {
-      all: products,
+      all: filteredProducts,
       inStock,
       outOfStock,
       lowStock,
       bestSelling
     };
-  }, [products]);
+  }, [filteredProducts]);
 
   const columns = [
     {
@@ -55,14 +104,14 @@ const AllProducts = () => {
       flex: 0.8,
       sortable: false,
       renderCell: (params) => {
-        const product = products.find(p => p._id === params.row.id);
+        const product = products?.find(p => p?._id === params.row.id);
         const imageUrl = product?.images?.[0] 
           ? `${backend_url}${product.images[0]}`
           : "https://via.placeholder.com/80";
         return (
           <img
             src={imageUrl}
-            alt={params.row.name}
+            alt={params.row.name || 'Product'}
             className="w-16 h-16 object-cover rounded-lg"
             onError={(e) => {
               e.target.src = "https://via.placeholder.com/80";
@@ -200,26 +249,51 @@ const AllProducts = () => {
           <div className="max-w-7xl mx-auto">
             {/* Header Section */}
             <div className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-xl shadow-lg p-4 mb-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="bg-white/20 backdrop-blur-sm p-2 rounded-lg">
-                    <FiPackage className="text-white" size={20} />
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="bg-white/20 backdrop-blur-sm p-2 rounded-lg">
+                      <FiPackage className="text-white" size={20} />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-white">
+                        Quản Lý Sản Phẩm
+                      </h2>
+                      <p className="text-purple-100 text-xs">
+                        Tổng: {products?.length || 0} sản phẩm
+                        {searchQuery && ` | Tìm thấy: ${filteredProducts?.length || 0} sản phẩm`}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-white">
-                      Quản Lý Sản Phẩm
-                    </h2>
-                    <p className="text-purple-100 text-xs">
-                      Tổng: {products?.length || 0} sản phẩm
-                    </p>
-                  </div>
+                  <Link to="/dashboard-create-product">
+                    <button className="flex items-center gap-1.5 bg-white text-purple-600 hover:bg-purple-50 font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 text-sm">
+                      <AiOutlinePlus size={16} />
+                      Tạo Mới
+                    </button>
+                  </Link>
                 </div>
-                <Link to="/dashboard-create-product">
-                  <button className="flex items-center gap-1.5 bg-white text-purple-600 hover:bg-purple-50 font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 text-sm">
-                    <AiOutlinePlus size={16} />
-                    Tạo Mới
-                  </button>
-                </Link>
+                
+                {/* Search Bar */}
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <AiOutlineSearch className="text-gray-400" size={20} />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Tìm kiếm sản phẩm theo tên, ID, giá, danh mục..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 bg-white/95 backdrop-blur-sm border border-white/30 rounded-lg text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all duration-200"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <span className="text-xl">×</span>
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -253,18 +327,28 @@ const AllProducts = () => {
             </div>
 
             {/* Products Display */}
-            {displayProducts.length === 0 ? (
+            {!displayProducts || displayProducts.length === 0 ? (
               <div className="bg-white rounded-xl shadow-lg p-12 text-center">
                 <FiPackage className="mx-auto text-gray-300 mb-4" size={64} />
                 <p className="text-gray-500 text-lg mb-4">
-                  Chưa có sản phẩm nào
+                  {searchQuery ? 'Không tìm thấy sản phẩm nào' : 'Chưa có sản phẩm nào'}
                 </p>
-                <Link to="/dashboard-create-product">
-                  <button className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200">
-                    <AiOutlinePlus size={18} />
-                    Tạo sản phẩm đầu tiên
+                {!searchQuery && (
+                  <Link to="/dashboard-create-product">
+                    <button className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+                      <AiOutlinePlus size={18} />
+                      Tạo sản phẩm đầu tiên
+                    </button>
+                  </Link>
+                )}
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="inline-flex items-center gap-2 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                  >
+                    Xóa bộ lọc
                   </button>
-                </Link>
+                )}
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
@@ -280,9 +364,10 @@ const AllProducts = () => {
                     : { label: 'Còn', color: 'from-green-500 to-green-600' };
 
                   return (
-                    <div
+                    <Link
                       key={product._id}
-                      className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border border-gray-100 group"
+                      to={`/product/${product._id}`}
+                      className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border border-gray-100 group cursor-pointer block"
                     >
                       {/* Product Image */}
                       <div className="relative h-32 bg-gray-100 overflow-hidden">
@@ -338,26 +423,45 @@ const AllProducts = () => {
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex items-center gap-1.5 pt-2 border-t border-gray-200">
-                          <Link to={`/product/${product._id}`} className="flex-1">
+                        <div 
+                          className="flex items-center gap-1.5 pt-2 border-t border-gray-200"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Link 
+                            to={`/product/${product._id}`} 
+                            className="flex-1"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                            }}
+                          >
                             <button className="w-full flex items-center justify-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-600 font-medium py-1.5 px-2 rounded text-xs transition-all duration-200">
                               <AiOutlineEye size={14} />
                             </button>
                           </Link>
-                          <Link to={`/dashboard-edit-product/${product._id}`} className="flex-1">
+                          <Link 
+                            to={`/dashboard-edit-product/${product._id}`} 
+                            className="flex-1"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                            }}
+                          >
                             <button className="w-full flex items-center justify-center gap-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-medium py-1.5 px-2 rounded text-xs transition-all duration-200">
                               <AiOutlineEdit size={14} />
                             </button>
                           </Link>
                           <button
-                            onClick={() => handleDelete(product._id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              handleDelete(product._id);
+                            }}
                             className="flex items-center justify-center bg-red-50 hover:bg-red-100 text-red-600 font-medium py-1.5 px-2 rounded text-xs transition-all duration-200"
                           >
                             <AiOutlineDelete size={14} />
                           </button>
                         </div>
                       </div>
-                    </div>
+                    </Link>
                   );
                 })}
               </div>
