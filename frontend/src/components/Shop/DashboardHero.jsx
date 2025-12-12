@@ -171,7 +171,7 @@ const DashboardHero = () => {
       sortable: false,
       renderCell: (params) => (
         <div className="flex items-center space-x-2">
-          <Link to={`/dashboard/order/${params.id}`}>
+          <Link to={`/order/${params.id}`}>
             <Button variant="contained" color="primary" size="small">
               <AiOutlineArrowRight size={18} className="mr-1" />
               Chi tiết
