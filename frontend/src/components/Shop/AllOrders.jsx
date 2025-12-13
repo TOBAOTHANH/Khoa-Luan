@@ -114,7 +114,7 @@ const AllOrders = () => {
     { id: 'shipping', label: 'Đang vận chuyển', count: categorizedOrders.shipping.length, icon: FiTruck, color: 'from-orange-500 to-orange-600' },
     { id: 'delivered', label: 'Đã giao hàng', count: categorizedOrders.delivered.length, icon: FiCheckCircle, color: 'from-green-500 to-green-600' },
     { id: 'refund', label: 'Hoàn tiền', count: categorizedOrders.refund.length, icon: FiXCircle, color: 'from-red-500 to-red-600' },
-    { id: 'notPaid', label: 'Chưa thanh toán', count: categorizedOrders.notPaid.length, icon: AiOutlineDollar, color: 'from-purple-500 to-purple-600' },
+    // { id: 'notPaid', label: 'Chưa thanh toán', count: categorizedOrders.notPaid.length, icon: AiOutlineDollar, color: 'from-purple-500 to-purple-600' },
   ];
 
   const getStatusColor = (status) => {

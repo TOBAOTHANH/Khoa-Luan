@@ -141,8 +141,8 @@ const OrderDetails = () => {
                   <h5 className="text-lg font-semibold text-gray-800 mb-1">{item.name}</h5>
                   <div className="flex items-center space-x-4 text-gray-600">
                     <span className="text-base">Số lượng: <strong className="text-gray-800">{item.qty}</strong></span>
-                    <span className="text-base">Giá: <strong className="text-green-600">US${item.discountPrice}</strong></span>
-                    <span className="text-base">Tổng: <strong className="text-blue-600">US${(item.discountPrice * item.qty).toFixed(2)}</strong></span>
+                    <span className="text-base">Giá: <strong className="text-green-600">{item.discountPrice}US$</strong></span>
+                    <span className="text-base">Tổng: <strong className="text-blue-600">{(item.discountPrice * item.qty).toFixed(2)}US$</strong></span>
                   </div>
                 </div>
               </div>
@@ -153,8 +153,8 @@ const OrderDetails = () => {
         <div className="mt-6 pt-4 border-t-2 border-gray-300">
           <div className="flex justify-end">
             <div className="bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-4 rounded-lg shadow-lg">
-              <p className="text-sm mb-1">Tổng tiền</p>
-              <h5 className="text-2xl font-bold">US${data?.totalPrice?.toFixed(2)}</h5>
+              <p className="text-sm mb-1 text-center">Tổng tiền</p>
+              <h5 className="text-2xl font-bold">{data?.totalPrice?.toFixed(2)} US$</h5>
             </div>
           </div>
         </div>

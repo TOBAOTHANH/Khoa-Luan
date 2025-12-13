@@ -59,14 +59,14 @@ const DashboardSideBar = ({ active }) => {
       color: "from-pink-500 to-pink-600",
       description: "Quản lý sự kiện",
     },
-    {
-      id: 7,
-      path: "/dashboard-withdraw-money",
-      icon: HiOutlineCash,
-      label: "Rút Tiền",
-      color: "from-emerald-500 to-emerald-600",
-      description: "Rút tiền từ shop",
-    },
+    // {
+    //   id: 7,
+    //   path: "/dashboard-withdraw-money",
+    //   icon: HiOutlineCash,
+    //   label: "Rút Tiền",
+    //   color: "from-emerald-500 to-emerald-600",
+    //   description: "Rút tiền từ shop",
+    // },
     {
       id: 8,
       path: "/dashboard-messages",
